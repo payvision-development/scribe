@@ -1,0 +1,11 @@
+# github.com/gorilla/context v1.1.1
+github.com/gorilla/context
+# github.com/gorilla/mux v1.6.2
+github.com/gorilla/mux
+# github.com/jarcoal/httpmock v0.0.0-20180424175123-9c70cfe4a1da
+github.com/jarcoal/httpmock
+# github.com/kelseyhightower/envconfig v1.3.0
+github.com/kelseyhightower/envconfig
+# github.com/valyala/fastjson v0.0.0-20180829103600-37952265e1c0
+github.com/valyala/fastjson
+github.com/valyala/fastjson/fastfloat
