@@ -4,7 +4,7 @@
 
 <p align="center">
   <br>
-  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/scribe.png" alt="Scribe" width="200">
+  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/scribe.png" alt="Scribe" width="250">
   <br><br>
 </p>
 
