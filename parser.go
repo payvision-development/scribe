@@ -42,6 +42,7 @@ func Parser(b []byte) *vss.Event {
 		re.Status = string(v.Get("resource").Get("environment").GetStringBytes("status"))
 
 	} else {
+
 		switch et := re.EventType; et {
 		case "ms.vss-release.deployment-started-event", "ms.vss-release.deployment-completed-event":
 

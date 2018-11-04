@@ -7,7 +7,6 @@ import (
 
 	"github.com/payvision-development/scribe/freshservice"
 	"github.com/payvision-development/scribe/vss"
-	"github.com/valyala/fastjson"
 )
 
 type state struct {
@@ -19,7 +18,7 @@ type state struct {
 func Session(ch chan *vss.Event) {
 
 	s := state{}
-	fs := freshservice.NewClient("https://foo.freshservice.com")
+	fs := freshservice.NewClient("https://foo.freshservice.com", "key")
 
 	for {
 		select {
@@ -40,15 +39,12 @@ func Session(ch chan *vss.Event) {
 					PlannedEndDate:   event.Timestamp,
 				}
 
-				change, _ := fs.CreateChange(&c)
-
-				var p fastjson.Parser
-				v, err := p.Parse(string(change))
+				change, err := fs.CreateChange(&c)
 				if err != nil {
-					log.Fatal(err)
+					log.Fatal(err.Error())
 				}
 
-				s.ChangeID = v.Get("item").Get("itil_change").GetInt("display_id")
+				s.ChangeID = change.Item.ItilChange.DisplayID
 
 			case "ms.vss-release.deployment-approval-pending-event":
 
@@ -61,7 +57,7 @@ func Session(ch chan *vss.Event) {
 			s.LastEvent = event
 
 		case <-time.After(5000 * time.Millisecond):
-			fmt.Println("timeout puto!")
+			fmt.Println("timeout!")
 			return
 		}
 	}
