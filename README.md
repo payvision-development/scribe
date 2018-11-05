@@ -10,6 +10,8 @@
 
 The goal of this project is to capture VSTS service hooks events, specifically those related with the release process and register the progress in the Freshservice platform.
 
+Documentation: [Execution Flow](https://github.com/payvision-development/scribe/wiki/Execution-Flow)
+
 ## Configuration
 
 Web Hooks provides a way to send a JSON representation of an event to any service, to start sending this events go to your VSTS project service hooks page and configure the VSTS event to fire it when any of this event types occurs:
