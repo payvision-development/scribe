@@ -61,8 +61,21 @@ type ItilChange struct {
 			AssocReleaseID     interface{}   `json:"assoc_release_id"`
 			AssociatedAssets   []interface{} `json:"associated_assets"`
 			Attachments        []interface{} `json:"attachments"`
-			Notes              []interface{} `json:"notes"`
-			CustomFieldValues  struct {
+			Notes              []struct {
+				Note struct {
+					ID         int64       `json:"id"`
+					Body       string      `json:"body"`
+					BodyHTML   string      `json:"body_html"`
+					ToEmails   interface{} `json:"to_emails"`
+					CcEmails   interface{} `json:"cc_emails"`
+					Deleted    bool        `json:"deleted"`
+					UserID     int64       `json:"user_id"`
+					CreatedAt  time.Time   `json:"created_at"`
+					UpdatedAt  time.Time   `json:"updated_at"`
+					HeaderInfo interface{} `json:"header_info"`
+				} `json:"note"`
+			} `json:"notes"`
+			CustomFieldValues struct {
 			} `json:"custom_field_values"`
 		} `json:"itil_change"`
 	} `json:"item"`
