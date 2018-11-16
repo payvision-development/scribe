@@ -4,11 +4,13 @@
 
 <p align="center">
   <br>
-  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/scribe.png" alt="Scribe" width="200">
+  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/scribe.png" alt="Scribe" width="250">
   <br><br>
 </p>
 
 The goal of this project is to capture VSTS service hooks events, specifically those related with the release process and register the progress in the Freshservice platform.
+
+Documentation: [Execution Flow](https://github.com/payvision-development/scribe/wiki/Execution-Flow)
 
 ## Configuration
 
