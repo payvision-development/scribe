@@ -15,7 +15,8 @@ import (
 
 // Specification struct
 type Specification struct {
-	FreshserviceURL string `required:"true" split_words:"true"`
+	FreshserviceURL    string `required:"true" split_words:"true"`
+	FreshserviceApikey string `required:"true" split_words:"true"`
 }
 
 var env Specification
@@ -58,7 +59,7 @@ func eventRouter() {
 			release = make(chan *vss.Event)
 			m[event.ReleaseTrackingCode] = release
 
-			go scribe.Session(release)
+			go scribe.Session(release, env.FreshserviceURL, env.FreshserviceApikey)
 		}
 
 		release <- event

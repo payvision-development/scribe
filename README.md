@@ -40,4 +40,5 @@ Run the image with the required environment variables:
 
     docker run --rm -it 
         -e SCRIBE_FRESHSERVICE_URL="https://foo.freshservice.com"
+        -e SCRIBE_FRESHSERVICE_APIKEY="key"
         -p 8000:8000 scribe

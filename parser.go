@@ -63,6 +63,7 @@ func Parser(b []byte) *vss.Event {
 					re.ReleaseName = string(k.Get("release").GetStringBytes("name"))
 					re.ReleaseURL = string(k.Get("release").GetStringBytes("url"))
 					re.Status = string(k.GetStringBytes("status"))
+					re.ApprovalType = string(v.Get("resource").Get("approval").GetStringBytes("approvalType"))
 
 					break
 				}
