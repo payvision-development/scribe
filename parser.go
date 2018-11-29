@@ -3,7 +3,6 @@ package scribe
 import (
 	"fmt"
 	"hash/fnv"
-	"log"
 	"strconv"
 	"strings"
 
@@ -12,14 +11,14 @@ import (
 )
 
 // Parser func
-func Parser(b []byte) *vss.Event {
+func Parser(b []byte) (*vss.Event, error) {
 
 	var p fastjson.Parser
 	var re vss.Event
 
 	v, err := p.Parse(string(b))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	re.SubscriptionID = string(v.GetStringBytes("subscriptionId"))
@@ -77,7 +76,7 @@ func Parser(b []byte) *vss.Event {
 
 	fmt.Printf("%+v\n", re)
 
-	return &re
+	return &re, nil
 }
 
 func hash(s string) uint32 {

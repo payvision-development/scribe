@@ -38,14 +38,20 @@ func main() {
 }
 
 func release(rw http.ResponseWriter, req *http.Request) {
-
 	b, err := ioutil.ReadAll(req.Body)
 	defer req.Body.Close()
+
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 
-	event := scribe.Parser(b)
+	event, err := scribe.Parser(b)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	events <- event
 }
 
