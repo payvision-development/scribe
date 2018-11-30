@@ -10,7 +10,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/payvision-development/scribe"
+	"github.com/payvision-development/scribe/freshservice"
 	"github.com/payvision-development/scribe/vss"
+	"github.com/payvision-development/scribe/release"
 )
 
 // Specification struct
@@ -59,15 +61,18 @@ func eventRouter() {
 	m := make(map[uint32]chan *vss.Event)
 
 	for event := range events {
-		release, ok := m[event.ReleaseTrackingCode]
+		deploy, ok := m[event.ReleaseTrackingCode]
 
 		if !ok {
-			release = make(chan *vss.Event)
-			m[event.ReleaseTrackingCode] = release
+			deploy = make(chan *vss.Event)
+			m[event.ReleaseTrackingCode] = deploy
 
-			go scribe.Session(release, env.FreshserviceURL, env.FreshserviceApikey)
+			changer := release.FreshserviceChanger
+			changer.Client = freshservice.NewClient(env.FreshserviceURL, env.FreshserviceApikey)
+
+			go scribe.Session(deploy, changer)
 		}
 
-		release <- event
+		deploy <- event
 	}
 }

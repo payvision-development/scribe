@@ -6,6 +6,7 @@ import (
 
 	"github.com/payvision-development/scribe/freshservice"
 	"github.com/payvision-development/scribe/vss"
+	"github.com/payvision-development/scribe/release"
 )
 
 type state struct {
@@ -14,10 +15,9 @@ type state struct {
 }
 
 // Session func
-func Session(ch chan *vss.Event, url string, apikey string) {
+func Session(ch chan *vss.Event, c release.Changer) {
 
 	s := state{}
-	fs := freshservice.NewClient(url, apikey)
 
 	for {
 		select {
@@ -26,20 +26,9 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 			switch et := event.EventType; et {
 			case "ms.vss-release.deployment-started-event":
 
-				c := freshservice.Change{
-					Email:            "hulk@outerspace.com",
-					Subject:          "[Release Management] Deployment of release " + event.ReleaseName + " to environment " + event.EnvironmentName,
-					DescriptionHTML:  event.DetailedMessageHTML,
-					Status:           freshservice.StatusPendingRelease,
-					Priority:         freshservice.PriorityMedium,
-					ChangeType:       freshservice.TypeStandard,
-					Risk:             freshservice.RiskMedium,
-					Impact:           freshservice.ImpactMedium,
-					PlannedStartDate: event.Timestamp,
-					PlannedEndDate:   event.Timestamp,
-				}
+				c.C
 
-				change, err := fs.CreateChange(&c)
+				change, err := createChange(fs, event)
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -48,18 +37,15 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 				s.ChangeID = change.Item.ItilChange.DisplayID
 
 				if nil != s.LastEvent && "ms.vss-release.deployment-approval-pending-event" == s.LastEvent.EventType {
-					_, err := fs.AddChangeNote(s.ChangeID, s.LastEvent.DetailedMessageHTML)
-					if err != nil {
-						fmt.Println(err)
-						return
-					}
+					var status freshservice.Status
 
 					if "preDeploy" == s.LastEvent.ApprovalType {
-						_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusAwaitingApproval)
+						status = freshservice.StatusAwaitingApproval
 					} else {
-						_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusPendingReview)
+						status = freshservice.StatusPendingReview
 					}
 
+					err := updateChange(fs, s.ChangeID, event.DetailedMessageHTML, status)
 					if err != nil {
 						fmt.Println(err)
 						return
@@ -69,18 +55,15 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 			case "ms.vss-release.deployment-approval-pending-event":
 
 				if 0 != s.ChangeID {
-					_, err := fs.AddChangeNote(s.ChangeID, event.DetailedMessageHTML)
-					if err != nil {
-						fmt.Println(err)
-						return
-					}
+					var status freshservice.Status
 
 					if "preDeploy" == event.ApprovalType {
-						_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusAwaitingApproval)
+						status = freshservice.StatusAwaitingApproval
 					} else {
-						_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusPendingReview)
+						status = freshservice.StatusPendingReview
 					}
 
+					err := updateChange(fs, s.ChangeID, event.DetailedMessageHTML, status)
 					if err != nil {
 						fmt.Println(err)
 						return
@@ -90,18 +73,15 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 			case "ms.vss-release.deployment-approval-completed-event":
 
 				if 0 != s.ChangeID {
-					_, err := fs.AddChangeNote(s.ChangeID, event.DetailedMessageHTML)
-					if err != nil {
-						fmt.Println(err)
-						return
-					}
+					var status freshservice.Status
 
 					if "preDeploy" == event.ApprovalType {
-						_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusPendingRelease)
+						status = freshservice.StatusPendingRelease
 					} else {
-						_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusOpen)
+						status = freshservice.StatusOpen
 					}
 
+					err := updateChange(fs, s.ChangeID, event.DetailedMessageHTML, status)
 					if err != nil {
 						fmt.Println(err)
 						return
@@ -111,13 +91,7 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 			case "ms.vss-release.deployment-completed-event":
 
 				if 0 != s.ChangeID {
-					_, err := fs.AddChangeNote(s.ChangeID, event.DetailedMessageHTML)
-					if err != nil {
-						fmt.Println(err)
-						return
-					}
-
-					_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusClosed)
+					err := updateChange(fs, s.ChangeID, event.DetailedMessageHTML, freshservice.StatusClosed)
 					if err != nil {
 						fmt.Println(err)
 						return
@@ -128,14 +102,9 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 			s.LastEvent = event
 
 		case <-time.After(5000 * time.Millisecond):
-			if 0 != s.ChangeID {
-				_, err := fs.AddChangeNote(s.ChangeID, "Deployment timeout<br>Status: Failed")
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
 
-				_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusClosed)
+			if 0 != s.ChangeID {
+				err := updateChange(fs, s.ChangeID, "Deployment timeout<br>Status: Failed", freshservice.StatusClosed)
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -145,4 +114,42 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 			return
 		}
 	}
+}
+
+func createChange(fs *freshservice.Freshservice, event *vss.Event) (*freshservice.ItilChange, error) {
+
+	c := freshservice.Change{
+		Email:            "hulk@outerspace.com",
+		Subject:          "[Release Management] Deployment of release " + event.ReleaseName + " to environment " + event.EnvironmentName,
+		DescriptionHTML:  event.DetailedMessageHTML,
+		Status:           freshservice.StatusPendingRelease,
+		Priority:         freshservice.PriorityMedium,
+		ChangeType:       freshservice.TypeStandard,
+		Risk:             freshservice.RiskMedium,
+		Impact:           freshservice.ImpactMedium,
+		PlannedStartDate: event.Timestamp,
+		PlannedEndDate:   event.Timestamp,
+	}
+
+	change, err := fs.CreateChange(&c)
+	if err != nil {
+		return nil, err
+	}
+
+	return change, nil
+}
+
+func updateChange(fs *freshservice.Freshservice, id int, msg string, status freshservice.Status) error {
+
+	_, err := fs.AddChangeNote(id, msg)
+	if err != nil {
+		return err
+	}
+
+	_, err = fs.UpdateChangeStatus(id, status)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
