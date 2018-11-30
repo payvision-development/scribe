@@ -4,16 +4,16 @@ import "time"
 
 // Change type
 type Change struct {
-	Email            string `json:"email"`
-	Subject          string `json:"subject"`
-	DescriptionHTML  string `json:"description_html"`
-	Status           int    `json:"status"`
-	Priority         int    `json:"priority"`
-	ChangeType       int    `json:"change_type"`
-	Risk             int    `json:"risk"`
-	Impact           int    `json:"impact"`
-	PlannedStartDate string `json:"planned_start_date"`
-	PlannedEndDate   string `json:"planned_end_date"`
+	Email            string   `json:"email"`
+	Subject          string   `json:"subject"`
+	DescriptionHTML  string   `json:"description_html"`
+	Status           Status   `json:"status"`
+	Priority         Priority `json:"priority"`
+	ChangeType       Type     `json:"change_type"`
+	Risk             Risk     `json:"risk"`
+	Impact           Impact   `json:"impact"`
+	PlannedStartDate string   `json:"planned_start_date"`
+	PlannedEndDate   string   `json:"planned_end_date"`
 }
 
 // ItilChange type

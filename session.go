@@ -8,13 +8,6 @@ import (
 	"github.com/payvision-development/scribe/vss"
 )
 
-var open = 1
-var planning = 2
-var awaitingApproval = 3
-var pendingRelease = 4
-var pendingReview = 5
-var closed = 6
-
 type state struct {
 	ChangeID  int
 	LastEvent *vss.Event
@@ -37,11 +30,11 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 					Email:            "hulk@outerspace.com",
 					Subject:          "[Release Management] Deployment of release " + event.ReleaseName + " to environment " + event.EnvironmentName,
 					DescriptionHTML:  event.DetailedMessageHTML,
-					Status:           4, // Pending release
-					Priority:         2, // Medium
-					ChangeType:       2, // Standard
-					Risk:             2, // Medium
-					Impact:           2, // Medium
+					Status:           freshservice.StatusPendingRelease,
+					Priority:         freshservice.PriorityMedium,
+					ChangeType:       freshservice.TypeStandard,
+					Risk:             freshservice.RiskMedium,
+					Impact:           freshservice.ImpactMedium,
 					PlannedStartDate: event.Timestamp,
 					PlannedEndDate:   event.Timestamp,
 				}
@@ -60,9 +53,9 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 					}
 
 					if "preDeploy" == s.LastEvent.ApprovalType {
-						_, err = fs.UpdateChangeStatus(s.ChangeID, awaitingApproval)
+						_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusAwaitingApproval)
 					} else {
-						_, err = fs.UpdateChangeStatus(s.ChangeID, pendingReview)
+						_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusPendingReview)
 					}
 
 					if err != nil {
@@ -79,9 +72,9 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 					}
 
 					if "preDeploy" == event.ApprovalType {
-						_, err = fs.UpdateChangeStatus(s.ChangeID, awaitingApproval)
+						_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusAwaitingApproval)
 					} else {
-						_, err = fs.UpdateChangeStatus(s.ChangeID, pendingReview)
+						_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusPendingReview)
 					}
 
 					if err != nil {
@@ -98,9 +91,9 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 					}
 
 					if "preDeploy" == event.ApprovalType {
-						_, err = fs.UpdateChangeStatus(s.ChangeID, pendingRelease)
+						_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusPendingRelease)
 					} else {
-						_, err = fs.UpdateChangeStatus(s.ChangeID, open)
+						_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusOpen)
 					}
 
 					if err != nil {
@@ -116,7 +109,7 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 						log.Fatal(err.Error())
 					}
 
-					_, err = fs.UpdateChangeStatus(s.ChangeID, closed)
+					_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusClosed)
 					if err != nil {
 						log.Fatal(err.Error())
 					}
@@ -132,7 +125,7 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 					log.Fatal(err.Error())
 				}
 
-				_, err = fs.UpdateChangeStatus(s.ChangeID, closed)
+				_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusClosed)
 				if err != nil {
 					log.Fatal(err.Error())
 				}

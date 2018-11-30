@@ -52,11 +52,11 @@ func (fs *Freshservice) CreateChange(c *Change) (*ItilChange, error) {
 }
 
 // UpdateChangeStatus func
-func (fs *Freshservice) UpdateChangeStatus(change int, status int) (*ItilChange, error) {
+func (fs *Freshservice) UpdateChangeStatus(change int, status Status) (*ItilChange, error) {
 
 	url := fmt.Sprintf(fs.URL + "/itil/changes/" + strconv.Itoa(change) + ".json")
 
-	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte(`{"itil_change":{"status":"`+strconv.Itoa(status)+`"}}`)))
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte(`{"itil_change":{"status":"`+strconv.Itoa(int(uint8(status)))+`"}}`)))
 	if err != nil {
 		return nil, err
 	}

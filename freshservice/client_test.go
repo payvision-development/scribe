@@ -78,11 +78,11 @@ func TestCreateChange(t *testing.T) {
 		Email:            "hulk@outerspace.com",
 		Subject:          "change for support",
 		DescriptionHTML:  "change description",
-		Status:           1,
-		Priority:         1,
-		ChangeType:       1,
-		Risk:             1,
-		Impact:           1,
+		Status:           StatusOpen,
+		Priority:         PriorityLow,
+		ChangeType:       TypeMinor,
+		Risk:             RiskLow,
+		Impact:           ImpactLow,
 		PlannedStartDate: "2018-01-01T00:00:00.00Z",
 		PlannedEndDate:   "2018-01-01T00:00:00.00Z",
 	}
@@ -111,7 +111,7 @@ func TestUpdateChangeStatus(t *testing.T) {
 	fs := NewClient(fsURL, fsKey)
 
 	changeID := 1
-	changeStatus := 2
+	changeStatus := StatusOpen
 	resJSON := fmt.Sprintf(`{
 		"status": true,
 		"item": {
@@ -175,7 +175,7 @@ func TestUpdateChangeStatus(t *testing.T) {
 		t.Error(err)
 	}
 
-	if changeStatus != res.Item.ItilChange.Status {
+	if int(changeStatus) != res.Item.ItilChange.Status {
 		t.Error(err)
 	}
 }
