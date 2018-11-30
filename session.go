@@ -1,7 +1,7 @@
 package scribe
 
 import (
-	"log"
+	"fmt"
 	"time"
 
 	"github.com/payvision-development/scribe/freshservice"
@@ -41,7 +41,8 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 
 				change, err := fs.CreateChange(&c)
 				if err != nil {
-					log.Fatal(err.Error())
+					fmt.Println(err)
+					return
 				}
 
 				s.ChangeID = change.Item.ItilChange.DisplayID
@@ -49,7 +50,8 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 				if nil != s.LastEvent && "ms.vss-release.deployment-approval-pending-event" == s.LastEvent.EventType {
 					_, err := fs.AddChangeNote(s.ChangeID, s.LastEvent.DetailedMessageHTML)
 					if err != nil {
-						log.Fatal(err.Error())
+						fmt.Println(err)
+						return
 					}
 
 					if "preDeploy" == s.LastEvent.ApprovalType {
@@ -59,7 +61,8 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 					}
 
 					if err != nil {
-						log.Fatal(err.Error())
+						fmt.Println(err)
+						return
 					}
 				}
 
@@ -68,7 +71,8 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 				if 0 != s.ChangeID {
 					_, err := fs.AddChangeNote(s.ChangeID, event.DetailedMessageHTML)
 					if err != nil {
-						log.Fatal(err.Error())
+						fmt.Println(err)
+						return
 					}
 
 					if "preDeploy" == event.ApprovalType {
@@ -78,7 +82,8 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 					}
 
 					if err != nil {
-						log.Fatal(err.Error())
+						fmt.Println(err)
+						return
 					}
 				}
 
@@ -87,7 +92,8 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 				if 0 != s.ChangeID {
 					_, err := fs.AddChangeNote(s.ChangeID, event.DetailedMessageHTML)
 					if err != nil {
-						log.Fatal(err.Error())
+						fmt.Println(err)
+						return
 					}
 
 					if "preDeploy" == event.ApprovalType {
@@ -97,7 +103,8 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 					}
 
 					if err != nil {
-						log.Fatal(err.Error())
+						fmt.Println(err)
+						return
 					}
 				}
 
@@ -106,12 +113,14 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 				if 0 != s.ChangeID {
 					_, err := fs.AddChangeNote(s.ChangeID, event.DetailedMessageHTML)
 					if err != nil {
-						log.Fatal(err.Error())
+						fmt.Println(err)
+						return
 					}
 
 					_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusClosed)
 					if err != nil {
-						log.Fatal(err.Error())
+						fmt.Println(err)
+						return
 					}
 				}
 			}
@@ -122,12 +131,14 @@ func Session(ch chan *vss.Event, url string, apikey string) {
 			if 0 != s.ChangeID {
 				_, err := fs.AddChangeNote(s.ChangeID, "Deployment timeout<br>Status: Failed")
 				if err != nil {
-					log.Fatal(err.Error())
+					fmt.Println(err)
+					return
 				}
 
 				_, err = fs.UpdateChangeStatus(s.ChangeID, freshservice.StatusClosed)
 				if err != nil {
-					log.Fatal(err.Error())
+					fmt.Println(err)
+					return
 				}
 			}
 
