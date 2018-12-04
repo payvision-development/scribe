@@ -52,9 +52,9 @@ func (fs *Freshservice) CreateChange(c *Change) (*ItilChange, error) {
 }
 
 // UpdateChangeStatus func
-func (fs *Freshservice) UpdateChangeStatus(change int, status Status) (*ItilChange, error) {
+func (fs *Freshservice) UpdateChangeStatus(change int64, status Status) (*ItilChange, error) {
 
-	url := fmt.Sprintf(fs.URL + "/itil/changes/" + strconv.Itoa(change) + ".json")
+	url := fmt.Sprintf(fs.URL + "/itil/changes/" + strconv.FormatInt(change, 10) + ".json")
 
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte(`{"itil_change":{"status":"`+strconv.Itoa(int(uint8(status)))+`"}}`)))
 	if err != nil {
@@ -75,8 +75,8 @@ func (fs *Freshservice) UpdateChangeStatus(change int, status Status) (*ItilChan
 }
 
 // AddChangeNote func
-func (fs *Freshservice) AddChangeNote(change int, note string) (*Note, error) {
-	url := fmt.Sprintf(fs.URL + "/itil/changes/" + strconv.Itoa(change) + "/notes.json")
+func (fs *Freshservice) AddChangeNote(change int64, note string) (*Note, error) {
+	url := fmt.Sprintf(fs.URL + "/itil/changes/" + strconv.FormatInt(change, 10) + "/notes.json")
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(`{"itil_note": {"body":"`+note+`"}}`)))
 	if err != nil {

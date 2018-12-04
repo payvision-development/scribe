@@ -11,8 +11,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/payvision-development/scribe"
 	"github.com/payvision-development/scribe/freshservice"
-	"github.com/payvision-development/scribe/vss"
 	"github.com/payvision-development/scribe/release"
+	"github.com/payvision-development/scribe/vss"
 )
 
 // Specification struct
@@ -35,11 +35,11 @@ func main() {
 	go eventRouter()
 
 	router := mux.NewRouter()
-	router.HandleFunc("/vss-release", release).Methods("POST")
+	router.HandleFunc("/vss-release", vssRelease).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
 
-func release(rw http.ResponseWriter, req *http.Request) {
+func vssRelease(rw http.ResponseWriter, req *http.Request) {
 	b, err := ioutil.ReadAll(req.Body)
 	defer req.Body.Close()
 
@@ -67,8 +67,7 @@ func eventRouter() {
 			deploy = make(chan *vss.Event)
 			m[event.ReleaseTrackingCode] = deploy
 
-			changer := release.FreshserviceChanger
-			changer.Client = freshservice.NewClient(env.FreshserviceURL, env.FreshserviceApikey)
+			changer := release.FreshserviceChanger{Client: freshservice.NewClient(env.FreshserviceURL, env.FreshserviceApikey)}
 
 			go scribe.Session(deploy, changer)
 		}

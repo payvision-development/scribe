@@ -170,7 +170,7 @@ func TestUpdateChangeStatus(t *testing.T) {
 	httpmock.RegisterResponder("PUT", fsURL+"/itil/changes/"+strconv.Itoa(changeID)+".json",
 		httpmock.NewStringResponder(200, resJSON))
 
-	res, err := fs.UpdateChangeStatus(changeID, changeStatus)
+	res, err := fs.UpdateChangeStatus(int64(changeID), changeStatus)
 	if err != nil {
 		t.Error(err)
 	}
@@ -216,7 +216,7 @@ func TestAddChangeNote(t *testing.T) {
 	httpmock.RegisterResponder("POST", fsURL+"/itil/changes/"+strconv.Itoa(changeID)+"/notes.json",
 		httpmock.NewStringResponder(200, resJSON))
 
-	res, err := fs.AddChangeNote(changeID, changeNote)
+	res, err := fs.AddChangeNote(int64(changeID), changeNote)
 	if err != nil {
 		t.Error(err)
 	}
