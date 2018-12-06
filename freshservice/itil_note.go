@@ -5,7 +5,7 @@ import "time"
 // RequestNote type
 type RequestNote struct {
 	Note struct {
-		Body string `json:"body"`
+		BodyHTML string `json:"body_html"`
 	} `json:"itil_note"`
 }
 

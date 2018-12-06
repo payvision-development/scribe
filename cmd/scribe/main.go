@@ -69,9 +69,10 @@ func eventRouter() {
 			deploy = make(chan *vss.Event)
 			m[event.ReleaseTrackingCode] = deploy
 
-			changer := release.FreshserviceChanger{Client: freshservice.NewClient(env.FreshserviceURL, env.FreshserviceApikey)}
+			client := freshservice.NewClient(env.FreshserviceURL, env.FreshserviceApikey)
+			changer := release.FreshserviceChanger{Client: client}
 
-			go scribe.Session(event.ReleaseTrackingCode, deploy, changer)
+			go scribe.Session(event.ReleaseTrackingCode, deploy, &changer)
 		}
 
 		deploy <- event

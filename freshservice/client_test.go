@@ -230,7 +230,7 @@ func TestAddChangeNote(t *testing.T) {
 		httpmock.NewStringResponder(200, resJSON))
 
 	n := &RequestNote{}
-	n.Note.Body = changeNote
+	n.Note.BodyHTML = changeNote
 
 	res, err := fs.AddChangeNote(int64(changeID), n)
 	if err != nil {

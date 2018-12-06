@@ -13,8 +13,8 @@ type RequestItilChange struct {
 		ChangeType       int    `json:"change_type"`
 		Risk             int    `json:"risk"`
 		Impact           int    `json:"impact"`
-		PlannedStartDate string `json:"planned_start_date"`
-		PlannedEndDate   string `json:"planned_end_date"`
+		PlannedStartDate string `json:"planned_start_date,omitempty"`
+		PlannedEndDate   string `json:"planned_end_date,omitempty"`
 	} `json:"itil_change"`
 }
 

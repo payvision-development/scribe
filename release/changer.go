@@ -1,15 +1,13 @@
 package release
 
 import (
-	"strconv"
-
 	"github.com/payvision-development/scribe/freshservice"
 )
 
 // Changer interface
 type Changer interface {
 	Create(name string, environment string, msg string, date string) (int64, error)
-	Update(msg string, status string) error
+	Update(msg string, status int) error
 }
 
 // FreshserviceChanger struct
@@ -20,7 +18,7 @@ type FreshserviceChanger struct {
 }
 
 // Create func
-func (f FreshserviceChanger) Create(name string, environment string, msg string, date string) (int64, error) {
+func (f *FreshserviceChanger) Create(name string, environment string, msg string, date string) (int64, error) {
 
 	c := &freshservice.RequestItilChange{}
 
@@ -48,22 +46,19 @@ func (f FreshserviceChanger) Create(name string, environment string, msg string,
 }
 
 // Update func
-func (f FreshserviceChanger) Update(msg string, status string) error {
+func (f *FreshserviceChanger) Update(msg string, status int) error {
 
 	n := &freshservice.RequestNote{}
-	n.Note.Body = msg
+	n.Note.BodyHTML = msg
 
 	_, err := f.Client.AddChangeNote(f.ResponseItilChange.Item.ItilChange.DisplayID, n)
 	if err != nil {
 		return err
 	}
 
-	i, err := strconv.Atoi(status)
-	if err != nil {
-		return err
-	}
-
-	f.RequestItilChange.ItilChange.Status = i
+	f.RequestItilChange.ItilChange.Status = status
+	f.RequestItilChange.ItilChange.PlannedStartDate = ""
+	f.RequestItilChange.ItilChange.PlannedEndDate = ""
 
 	_, err = f.Client.UpdateChange(f.ResponseItilChange.Item.ItilChange.DisplayID, f.RequestItilChange)
 	if err != nil {

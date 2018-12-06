@@ -26,9 +26,6 @@ func NewClient(url string, apikey string) *Freshservice {
 
 // CreateChange func
 func (fs *Freshservice) CreateChange(c *RequestItilChange) (*ResponseItilChange, error) {
-
-	fmt.Printf("Creating Change... %+v\n", c)
-
 	url := fmt.Sprintf(fs.URL + "/itil/changes.json")
 
 	reqItilChange, err := json.Marshal(c)
@@ -42,14 +39,13 @@ func (fs *Freshservice) CreateChange(c *RequestItilChange) (*ResponseItilChange,
 	}
 
 	req.SetBasicAuth(fs.APIKey, "X")
+	req.Header.Set("Content-Type", "application/json")
 	res, err := httpclient.DoRequest(req)
 	if err != nil {
 		return nil, err
 	}
 
 	var resItilChange ResponseItilChange
-
-	fmt.Printf("Change created: %+v\n", resItilChange)
 
 	err = json.Unmarshal(res, &resItilChange)
 	if err != nil {
@@ -61,9 +57,6 @@ func (fs *Freshservice) CreateChange(c *RequestItilChange) (*ResponseItilChange,
 
 // UpdateChange func
 func (fs *Freshservice) UpdateChange(change int64, c *RequestItilChange) (*ResponseItilChange, error) {
-
-	fmt.Printf("Updating Change... %+v\n", c)
-
 	url := fmt.Sprintf(fs.URL + "/itil/changes/" + strconv.FormatInt(change, 10) + ".json")
 
 	reqItilChange, err := json.Marshal(c)
@@ -77,14 +70,13 @@ func (fs *Freshservice) UpdateChange(change int64, c *RequestItilChange) (*Respo
 	}
 
 	req.SetBasicAuth(fs.APIKey, "X")
+	req.Header.Set("Content-Type", "application/json")
 	res, err := httpclient.DoRequest(req)
 	if err != nil {
 		return nil, err
 	}
 
 	var resItilChange ResponseItilChange
-
-	fmt.Printf("Change updated: %+v\n", resItilChange)
 
 	err = json.Unmarshal(res, &resItilChange)
 	if err != nil {
@@ -96,9 +88,6 @@ func (fs *Freshservice) UpdateChange(change int64, c *RequestItilChange) (*Respo
 
 // AddChangeNote func
 func (fs *Freshservice) AddChangeNote(change int64, n *RequestNote) (*ResponseNote, error) {
-
-	fmt.Printf("Adding note to Change... %+v\n", n)
-
 	url := fmt.Sprintf(fs.URL + "/itil/changes/" + strconv.FormatInt(change, 10) + "/notes.json")
 
 	reqNote, err := json.Marshal(n)
@@ -112,14 +101,13 @@ func (fs *Freshservice) AddChangeNote(change int64, n *RequestNote) (*ResponseNo
 	}
 
 	req.SetBasicAuth(fs.APIKey, "X")
+	req.Header.Set("Content-Type", "application/json")
 	res, err := httpclient.DoRequest(req)
 	if err != nil {
 		return nil, err
 	}
 
 	var resNote ResponseNote
-
-	fmt.Printf("Note added: %+v\n", resNote)
 
 	err = json.Unmarshal(res, &resNote)
 	if err != nil {

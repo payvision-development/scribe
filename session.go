@@ -22,7 +22,6 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer) {
 	for {
 		select {
 		case event := <-ch:
-
 			switch et := event.EventType; et {
 
 			case vss.DeploymentStartedEvent:
@@ -44,7 +43,7 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer) {
 							status = freshservice.StatusPendingReview
 						}
 
-						err := c.Update(event.DetailedMessageHTML, string(status))
+						err := c.Update(event.DetailedMessageHTML, status)
 						if err != nil {
 							fmt.Println(err)
 						}
@@ -64,7 +63,7 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer) {
 						status = freshservice.StatusPendingReview
 					}
 
-					err := c.Update(event.DetailedMessageHTML, string(status))
+					err := c.Update(event.DetailedMessageHTML, status)
 					if err != nil {
 						fmt.Println(err)
 					}
@@ -83,7 +82,7 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer) {
 						status = freshservice.StatusOpen
 					}
 
-					err := c.Update(event.DetailedMessageHTML, string(status))
+					err := c.Update(event.DetailedMessageHTML, status)
 					if err != nil {
 						fmt.Println(err)
 					}
@@ -94,7 +93,7 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer) {
 				fmt.Printf("[Release: %v] Event: %v\n", tc, vss.DeploymentCompletedEvent)
 
 				if 0 != s.ChangeID {
-					err := c.Update(event.DetailedMessageHTML, string(freshservice.StatusClosed))
+					err := c.Update(event.DetailedMessageHTML, freshservice.StatusClosed)
 					if err != nil {
 						fmt.Println(err)
 					}
@@ -108,7 +107,7 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer) {
 			fmt.Printf("[Release: %v] Event: %v\n", tc, "Deployment timeout")
 
 			if 0 != s.ChangeID {
-				err := c.Update("Deployment timeout<br>Status: Failed", string(freshservice.StatusClosed))
+				err := c.Update("Deployment timeout<br>Status: Failed", freshservice.StatusClosed)
 				if err != nil {
 					fmt.Println(err)
 				}
