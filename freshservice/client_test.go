@@ -74,32 +74,32 @@ func TestCreateChange(t *testing.T) {
 	httpmock.RegisterResponder("POST", fsURL+"/itil/changes.json",
 		httpmock.NewStringResponder(200, resJSON))
 
-	c := Change{
-		Email:            "hulk@outerspace.com",
-		Subject:          "change for support",
-		DescriptionHTML:  "change description",
-		Status:           StatusOpen,
-		Priority:         PriorityLow,
-		ChangeType:       TypeMinor,
-		Risk:             RiskLow,
-		Impact:           ImpactLow,
-		PlannedStartDate: "2018-01-01T00:00:00.00Z",
-		PlannedEndDate:   "2018-01-01T00:00:00.00Z",
-	}
+	c := &RequestItilChange{}
 
-	res, err := fs.CreateChange(&c)
+	c.ItilChange.Email = "hulk@outerspace.com"
+	c.ItilChange.Subject = "change for support"
+	c.ItilChange.DescriptionHTML = "change description"
+	c.ItilChange.Status = StatusOpen
+	c.ItilChange.Priority = PriorityLow
+	c.ItilChange.ChangeType = TypeMinor
+	c.ItilChange.Risk = RiskLow
+	c.ItilChange.Impact = ImpactLow
+	c.ItilChange.PlannedStartDate = "2018-01-01T00:00:00.00Z"
+	c.ItilChange.PlannedEndDate = "2018-01-01T00:00:00.00Z"
+
+	res, err := fs.CreateChange(c)
 	if err != nil {
 		t.Error(err)
 	}
 
-	var response ItilChange
+	var resItilChange ResponseItilChange
 
-	err = json.Unmarshal([]byte(resJSON), &response)
+	err = json.Unmarshal([]byte(resJSON), &resItilChange)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if reflect.DeepEqual(res.Item, response.Item) != true {
+	if reflect.DeepEqual(res.Item, resItilChange.Item) != true {
 		t.Error(err)
 	}
 }
@@ -170,7 +170,20 @@ func TestUpdateChangeStatus(t *testing.T) {
 	httpmock.RegisterResponder("PUT", fsURL+"/itil/changes/"+strconv.Itoa(changeID)+".json",
 		httpmock.NewStringResponder(200, resJSON))
 
-	res, err := fs.UpdateChangeStatus(int64(changeID), changeStatus)
+	c := &RequestItilChange{}
+
+	c.ItilChange.Email = "hulk@outerspace.com"
+	c.ItilChange.Subject = "change for support"
+	c.ItilChange.DescriptionHTML = "change description"
+	c.ItilChange.Status = changeStatus
+	c.ItilChange.Priority = PriorityLow
+	c.ItilChange.ChangeType = TypeMinor
+	c.ItilChange.Risk = RiskLow
+	c.ItilChange.Impact = ImpactLow
+	c.ItilChange.PlannedStartDate = "2018-01-01T00:00:00.00Z"
+	c.ItilChange.PlannedEndDate = "2018-01-01T00:00:00.00Z"
+
+	res, err := fs.UpdateChange(int64(changeID), c)
 	if err != nil {
 		t.Error(err)
 	}
@@ -216,7 +229,10 @@ func TestAddChangeNote(t *testing.T) {
 	httpmock.RegisterResponder("POST", fsURL+"/itil/changes/"+strconv.Itoa(changeID)+"/notes.json",
 		httpmock.NewStringResponder(200, resJSON))
 
-	res, err := fs.AddChangeNote(int64(changeID), changeNote)
+	n := &RequestNote{}
+	n.Note.Body = changeNote
+
+	res, err := fs.AddChangeNote(int64(changeID), n)
 	if err != nil {
 		t.Error(err)
 	}

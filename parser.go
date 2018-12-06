@@ -1,7 +1,6 @@
 package scribe
 
 import (
-	"fmt"
 	"hash/fnv"
 	"strconv"
 	"strings"
@@ -73,8 +72,6 @@ func Parser(b []byte) (*vss.Event, error) {
 	}
 
 	re.ReleaseTrackingCode = hash(strings.Join([]string{strconv.Itoa(re.EnvironmentID), re.ProjectID}, "-"))
-
-	fmt.Printf("%+v\n", re)
 
 	return &re, nil
 }

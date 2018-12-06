@@ -2,27 +2,29 @@ package freshservice
 
 import "time"
 
-// Change type
-type Change struct {
-	Email            string   `json:"email"`
-	Subject          string   `json:"subject"`
-	DescriptionHTML  string   `json:"description_html"`
-	Status           Status   `json:"status"`
-	Priority         Priority `json:"priority"`
-	ChangeType       Type     `json:"change_type"`
-	Risk             Risk     `json:"risk"`
-	Impact           Impact   `json:"impact"`
-	PlannedStartDate string   `json:"planned_start_date"`
-	PlannedEndDate   string   `json:"planned_end_date"`
+// RequestItilChange type
+type RequestItilChange struct {
+	ItilChange struct {
+		Email            string `json:"email"`
+		Subject          string `json:"subject"`
+		DescriptionHTML  string `json:"description_html"`
+		Status           int    `json:"status"`
+		Priority         int    `json:"priority"`
+		ChangeType       int    `json:"change_type"`
+		Risk             int    `json:"risk"`
+		Impact           int    `json:"impact"`
+		PlannedStartDate string `json:"planned_start_date"`
+		PlannedEndDate   string `json:"planned_end_date"`
+	} `json:"itil_change"`
 }
 
-// ItilChange type
-type ItilChange struct {
+// ResponseItilChange type
+type ResponseItilChange struct {
 	Status bool `json:"status"`
 	Item   struct {
 		ItilChange struct {
 			ID             int64       `json:"id"`
-			DisplayID      int         `json:"display_id"`
+			DisplayID      int64       `json:"display_id"`
 			RequesterID    int64       `json:"requester_id"`
 			OwnerID        interface{} `json:"owner_id"`
 			GroupID        interface{} `json:"group_id"`
@@ -78,29 +80,6 @@ type ItilChange struct {
 			CustomFieldValues struct {
 			} `json:"custom_field_values"`
 		} `json:"itil_change"`
-	} `json:"item"`
-	Redirect interface{} `json:"redirect"`
-}
-
-// Note type
-type Note struct {
-	Status bool `json:"status"`
-	Item   struct {
-		Note struct {
-			ID          int64       `json:"id"`
-			Body        string      `json:"body"`
-			BodyHTML    string      `json:"body_html"`
-			ToEmails    interface{} `json:"to_emails"`
-			CcEmails    interface{} `json:"cc_emails"`
-			Deleted     bool        `json:"deleted"`
-			NotableType string      `json:"notable_type"`
-			NotableID   int64       `json:"notable_id"`
-			UserID      int64       `json:"user_id"`
-			AccountID   int         `json:"account_id"`
-			CreatedAt   time.Time   `json:"created_at"`
-			UpdatedAt   time.Time   `json:"updated_at"`
-			HeaderInfo  interface{} `json:"header_info"`
-		} `json:"note"`
 	} `json:"item"`
 	Redirect interface{} `json:"redirect"`
 }

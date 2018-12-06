@@ -15,7 +15,7 @@ type state struct {
 }
 
 // Session func
-func Session(ch chan *vss.Event, c release.Changer) {
+func Session(tc uint32, ch chan *vss.Event, c release.Changer) {
 
 	s := state{}
 
@@ -24,36 +24,39 @@ func Session(ch chan *vss.Event, c release.Changer) {
 		case event := <-ch:
 
 			switch et := event.EventType; et {
-			case "ms.vss-release.deployment-started-event":
+
+			case vss.DeploymentStartedEvent:
+
+				fmt.Printf("[Release: %v] Event: %v\n", tc, vss.DeploymentStartedEvent)
 
 				id, err := c.Create(event.ReleaseName, event.EnvironmentName, event.DetailedMessageHTML, event.Timestamp)
 				if err != nil {
 					fmt.Println(err)
-					return
-				}
+				} else {
+					s.ChangeID = id
 
-				s.ChangeID = id
+					if nil != s.LastEvent && vss.DeploymentApprovalPendingEvent == s.LastEvent.EventType {
+						var status int
 
-				if nil != s.LastEvent && "ms.vss-release.deployment-approval-pending-event" == s.LastEvent.EventType {
-					var status freshservice.Status
+						if "preDeploy" == s.LastEvent.ApprovalType {
+							status = freshservice.StatusAwaitingApproval
+						} else {
+							status = freshservice.StatusPendingReview
+						}
 
-					if "preDeploy" == s.LastEvent.ApprovalType {
-						status = freshservice.StatusAwaitingApproval
-					} else {
-						status = freshservice.StatusPendingReview
-					}
-
-					err := c.Update(event.DetailedMessageHTML, string(status))
-					if err != nil {
-						fmt.Println(err)
-						return
+						err := c.Update(event.DetailedMessageHTML, string(status))
+						if err != nil {
+							fmt.Println(err)
+						}
 					}
 				}
 
-			case "ms.vss-release.deployment-approval-pending-event":
+			case vss.DeploymentApprovalPendingEvent:
+
+				fmt.Printf("[Release: %v] Event: %v\n", tc, vss.DeploymentApprovalPendingEvent)
 
 				if 0 != s.ChangeID {
-					var status freshservice.Status
+					var status int
 
 					if "preDeploy" == event.ApprovalType {
 						status = freshservice.StatusAwaitingApproval
@@ -64,14 +67,15 @@ func Session(ch chan *vss.Event, c release.Changer) {
 					err := c.Update(event.DetailedMessageHTML, string(status))
 					if err != nil {
 						fmt.Println(err)
-						return
 					}
 				}
 
-			case "ms.vss-release.deployment-approval-completed-event":
+			case vss.DeploymentApprovalCompletedEvent:
+
+				fmt.Printf("[Release: %v] Event: %v\n", tc, vss.DeploymentApprovalCompletedEvent)
 
 				if 0 != s.ChangeID {
-					var status freshservice.Status
+					var status int
 
 					if "preDeploy" == event.ApprovalType {
 						status = freshservice.StatusPendingRelease
@@ -82,30 +86,31 @@ func Session(ch chan *vss.Event, c release.Changer) {
 					err := c.Update(event.DetailedMessageHTML, string(status))
 					if err != nil {
 						fmt.Println(err)
-						return
 					}
 				}
 
-			case "ms.vss-release.deployment-completed-event":
+			case vss.DeploymentCompletedEvent:
+
+				fmt.Printf("[Release: %v] Event: %v\n", tc, vss.DeploymentCompletedEvent)
 
 				if 0 != s.ChangeID {
 					err := c.Update(event.DetailedMessageHTML, string(freshservice.StatusClosed))
 					if err != nil {
 						fmt.Println(err)
-						return
 					}
 				}
 			}
 
 			s.LastEvent = event
 
-		case <-time.After(5000 * time.Millisecond):
+		case <-time.After(10000 * time.Millisecond):
+
+			fmt.Printf("[Release: %v] Event: %v\n", tc, "Deployment timeout")
 
 			if 0 != s.ChangeID {
 				err := c.Update("Deployment timeout<br>Status: Failed", string(freshservice.StatusClosed))
 				if err != nil {
 					fmt.Println(err)
-					return
 				}
 			}
 

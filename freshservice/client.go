@@ -25,73 +25,106 @@ func NewClient(url string, apikey string) *Freshservice {
 }
 
 // CreateChange func
-func (fs *Freshservice) CreateChange(c *Change) (*ItilChange, error) {
+func (fs *Freshservice) CreateChange(c *RequestItilChange) (*ResponseItilChange, error) {
+
+	fmt.Printf("Creating Change... %+v\n", c)
+
 	url := fmt.Sprintf(fs.URL + "/itil/changes.json")
 
-	change, err := json.Marshal(c)
+	reqItilChange, err := json.Marshal(c)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(change))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqItilChange))
 	if err != nil {
 		return nil, err
 	}
 
 	req.SetBasicAuth(fs.APIKey, "X")
 	res, err := httpclient.DoRequest(req)
-
-	var response ItilChange
-
-	err = json.Unmarshal(res, &response)
 	if err != nil {
 		return nil, err
 	}
 
-	return &response, nil
+	var resItilChange ResponseItilChange
+
+	fmt.Printf("Change created: %+v\n", resItilChange)
+
+	err = json.Unmarshal(res, &resItilChange)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resItilChange, nil
 }
 
-// UpdateChangeStatus func
-func (fs *Freshservice) UpdateChangeStatus(change int64, status Status) (*ItilChange, error) {
+// UpdateChange func
+func (fs *Freshservice) UpdateChange(change int64, c *RequestItilChange) (*ResponseItilChange, error) {
+
+	fmt.Printf("Updating Change... %+v\n", c)
 
 	url := fmt.Sprintf(fs.URL + "/itil/changes/" + strconv.FormatInt(change, 10) + ".json")
 
-	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte(`{"itil_change":{"status":"`+strconv.Itoa(int(uint8(status)))+`"}}`)))
+	reqItilChange, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(reqItilChange))
 	if err != nil {
 		return nil, err
 	}
 
 	req.SetBasicAuth(fs.APIKey, "X")
 	res, err := httpclient.DoRequest(req)
-
-	var response ItilChange
-
-	err = json.Unmarshal(res, &response)
 	if err != nil {
 		return nil, err
 	}
 
-	return &response, nil
+	var resItilChange ResponseItilChange
+
+	fmt.Printf("Change updated: %+v\n", resItilChange)
+
+	err = json.Unmarshal(res, &resItilChange)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resItilChange, nil
 }
 
 // AddChangeNote func
-func (fs *Freshservice) AddChangeNote(change int64, note string) (*Note, error) {
+func (fs *Freshservice) AddChangeNote(change int64, n *RequestNote) (*ResponseNote, error) {
+
+	fmt.Printf("Adding note to Change... %+v\n", n)
+
 	url := fmt.Sprintf(fs.URL + "/itil/changes/" + strconv.FormatInt(change, 10) + "/notes.json")
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(`{"itil_note": {"body":"`+note+`"}}`)))
+	reqNote, err := json.Marshal(n)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqNote))
 	if err != nil {
 		return nil, err
 	}
 
 	req.SetBasicAuth(fs.APIKey, "X")
 	res, err := httpclient.DoRequest(req)
-
-	var response Note
-
-	err = json.Unmarshal(res, &response)
 	if err != nil {
 		return nil, err
 	}
 
-	return &response, nil
+	var resNote ResponseNote
+
+	fmt.Printf("Note added: %+v\n", resNote)
+
+	err = json.Unmarshal(res, &resNote)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resNote, nil
 }
