@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/payvision-development/scribe"
 	"github.com/payvision-development/scribe/freshservice"
+	"github.com/payvision-development/scribe/health"
 	"github.com/payvision-development/scribe/release"
 	"github.com/payvision-development/scribe/vss"
 )
@@ -35,8 +37,27 @@ func main() {
 	go eventRouter()
 
 	router := mux.NewRouter()
+	router.HandleFunc("/status", status).Methods("GET")
 	router.HandleFunc("/vss-release", vssRelease).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8000", router))
+}
+
+func status(rw http.ResponseWriter, req *http.Request) {
+	status := health.Status{
+		Service:     "Scribe",
+		Description: "VSTS Release event integration with Freshservice",
+		Status:      "OK",
+		Version:     "0.0.0",
+	}
+
+	client := freshservice.NewClient(env.FreshserviceURL, env.FreshserviceApikey)
+
+	err := client.CheckEndpoint()
+	if err != nil {
+		status.Status = "KO: Failed to connect with Freshservice API endpoint"
+	}
+
+	json.NewEncoder(rw).Encode(status)
 }
 
 func vssRelease(rw http.ResponseWriter, req *http.Request) {

@@ -116,3 +116,22 @@ func (fs *Freshservice) AddChangeNote(change int64, n *RequestNote) (*ResponseNo
 
 	return &resNote, nil
 }
+
+// CheckEndpoint func
+func (fs *Freshservice) CheckEndpoint() error {
+	url := fmt.Sprintf(fs.URL + "/itil/changes.json")
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+
+	req.SetBasicAuth(fs.APIKey, "X")
+	req.Header.Set("Content-Type", "application/json")
+	_, err = httpclient.DoRequest(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
