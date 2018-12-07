@@ -23,7 +23,7 @@ Web Hooks provides a way to send a JSON representation of an event to any servic
 
 Service Hook configuration:
 
-- Service Hook URL: https://scribe.app/vss-release  
+- Service Hook URL: https://scribe.app/vss/release  
 - Resource details to send: All 
 - Messages to send: All 
 - Detailed messages to send: All 
@@ -38,9 +38,24 @@ Build the docker image:
 
 Run the image with the required environment variables:
 
-    docker run --rm -it 
-        -e SCRIBE_USER="user"
-        -e SCRIBE_PASS="pass"
-        -e SCRIBE_FRESHSERVICE_URL="https://foo.freshservice.com"
-        -e SCRIBE_FRESHSERVICE_APIKEY="key"
-        -p 8000:8000 scribe
+```shell
+docker run --rm -it 
+    -e SCRIBE_USER="user"
+    -e SCRIBE_PASS="pass"
+    -e SCRIBE_FRESHSERVICE_URL="https://foo.freshservice.com"
+    -e SCRIBE_FRESHSERVICE_APIKEY="key"
+    -p 8000:8000 scribe
+```
+
+Check the health endpoint:
+
+```json
+GET /status HTTP/1.1
+
+{
+  "Service":"Scribe",
+  "Description":"VSTS Release event integration with Freshservice",
+  "Status":"OK",
+  "Version":"0.0.0"
+}
+```
