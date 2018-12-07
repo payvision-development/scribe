@@ -44,7 +44,7 @@ docker run --rm -it
     -e SCRIBE_PASS="pass"
     -e SCRIBE_FRESHSERVICE_URL="https://foo.freshservice.com"
     -e SCRIBE_FRESHSERVICE_APIKEY="key"
-    -p 8000:8000 scribe
+    -p 8080:8080 scribe
 ```
 
 Check the health endpoint:
