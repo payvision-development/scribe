@@ -7,18 +7,20 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kelseyhightower/envconfig"
-
 	"github.com/gorilla/mux"
+	"github.com/kelseyhightower/envconfig"
 	"github.com/payvision-development/scribe"
 	"github.com/payvision-development/scribe/freshservice"
 	"github.com/payvision-development/scribe/health"
 	"github.com/payvision-development/scribe/release"
 	"github.com/payvision-development/scribe/vss"
+	"github.com/urfave/negroni"
 )
 
 // Specification struct
 type Specification struct {
+	User               string `required:"true"`
+	Pass               string `required:"true"`
 	FreshserviceURL    string `required:"true" split_words:"true"`
 	FreshserviceApikey string `required:"true" split_words:"true"`
 }
@@ -36,10 +38,33 @@ func main() {
 
 	go eventRouter()
 
+	n := negroni.Classic()
 	router := mux.NewRouter()
+
 	router.HandleFunc("/status", status).Methods("GET")
-	router.HandleFunc("/vss-release", vssRelease).Methods("POST")
-	log.Fatal(http.ListenAndServe(":8000", router))
+
+	vssRouter := mux.NewRouter().PathPrefix("/vss").Subrouter().StrictSlash(true)
+	vssRouter.HandleFunc("/release", vssRelease).Methods("POST")
+
+	router.PathPrefix("/vss").Handler(negroni.New(
+		negroni.HandlerFunc(basicAuth),
+		negroni.Wrap(vssRouter),
+	))
+
+	n.UseHandler(router)
+	n.Run(":8080")
+}
+
+func basicAuth(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	user, pass, _ := r.BasicAuth()
+
+	if env.User != user || env.Pass != pass {
+		rw.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+		http.Error(rw, "Unauthorized.", http.StatusUnauthorized)
+		return
+	}
+
+	next(rw, r)
 }
 
 func status(rw http.ResponseWriter, req *http.Request) {

@@ -39,6 +39,8 @@ Build the docker image:
 Run the image with the required environment variables:
 
     docker run --rm -it 
+        -e SCRIBE_USER="user"
+        -e SCRIBE_PASS="pass"
         -e SCRIBE_FRESHSERVICE_URL="https://foo.freshservice.com"
         -e SCRIBE_FRESHSERVICE_APIKEY="key"
         -p 8000:8000 scribe
