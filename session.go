@@ -35,7 +35,7 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 					fmt.Println(err)
 				}
 
-				err = createChange(event.ReleaseName, event.EnvironmentName, desc.String(), event.Timestamp, &s, fs)
+				err = createChange(event.ReleaseName, event.EnvironmentName, desc, event.Timestamp, &s, fs)
 				if err != nil {
 					fmt.Println(err)
 				} else {
@@ -129,35 +129,38 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 	}
 }
 
-func composeDescription(event *vss.Event, v *vss.TFS) (*strings.Builder, error) {
+func composeDescription(event *vss.Event, v *vss.TFS) (string, error) {
 	var s strings.Builder
 
 	if v != nil {
-		s.WriteString("<br><b>Work Items to deploy</b><br>")
-
 		r, err := v.GetRelease(event.ProjectID, event.ReleaseID)
 		if err != nil {
-			return &s, err
+			return "", err
 		}
 
 		ws, err := v.GetWorkItems(event.ProjectID, r.Artifacts[0].DefinitionReference.Version.ID)
 		if err != nil {
-			return &s, err
+			return "", err
 		}
 
-		for _, item := range ws.Value {
-			w, err := v.GetWorkItem(item.ID)
-			if err != nil {
-				return &s, err
+		if ws.Count != 0 {
+			s.WriteString("<br><b>Work Items to deploy</b><br>")
+
+			for _, item := range ws.Value {
+				w, err := v.GetWorkItem(item.ID)
+				if err != nil {
+					return "", err
+				}
+
+				s.WriteString("<br>[" + w.Fields.SystemWorkItemType + "] <a href='" + w.Links.HTML.Href + "'>" + w.Fields.SystemTitle + "</a>")
 			}
 
-			s.WriteString("<br>[" + w.Fields.SystemWorkItemType + "] <a href='" + w.Links.HTML.Href + "'>" + w.Fields.SystemTitle + "</a>")
+			return s.String(), nil
 		}
-	} else {
-		s.WriteString("<br><b>No Work Items associated to this deploy</b><br>")
 	}
 
-	return &s, nil
+	s.WriteString("<br><b>No Work Items associated to this deploy</b><br>")
+	return s.String(), nil
 }
 
 func createChange(name string, environment string, msg string, date string, s *state, fs *freshservice.Freshservice) error {
