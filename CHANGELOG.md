@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - Add Work Items to Freshservice change when available
+- Refactor TFS API client 
 
 ## 1.0.0 - 2018-12-07
 ### Added

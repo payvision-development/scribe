@@ -6,17 +6,18 @@ import (
 	"time"
 
 	"github.com/payvision-development/scribe/freshservice"
-	"github.com/payvision-development/scribe/release"
 	"github.com/payvision-development/scribe/vss"
 )
 
 type state struct {
-	ChangeID  int64
-	LastEvent *vss.Event
+	ChangeID           int64
+	LastEvent          *vss.Event
+	RequestItilChange  *freshservice.RequestItilChange
+	ResponseItilChange *freshservice.ResponseItilChange
 }
 
 // Session func
-func Session(tc uint32, ch chan *vss.Event, c release.Changer, v *vss.VSTS) {
+func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vss.TFS) {
 
 	s := state{}
 
@@ -29,40 +30,16 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer, v *vss.VSTS) {
 
 				fmt.Printf("[Release: %v] Event: %v\n", tc, vss.DeploymentStartedEvent)
 
-				var descriptionHTML strings.Builder
-
-				if v != nil {
-					descriptionHTML.WriteString("<br><b>Work Items to deploy</b><br>")
-
-					release, err := v.Release(event.ReleaseURL)
-					if err != nil {
-						fmt.Println(err)
-					} else {
-						workItems, err := v.WorkItems(release)
-						if err != nil {
-							fmt.Println(err)
-						} else {
-							for _, workItem := range workItems.Value {
-								w, err := v.WorkItem(workItem.URL)
-								if err != nil {
-									fmt.Println(err)
-								} else {
-									descriptionHTML.WriteString("<br>[" + w.Fields.SystemWorkItemType + "] <a href='" + w.Links.HTML.Href + "'>" + w.Fields.SystemTitle + "</a>")
-								}
-							}
-						}
-					}
-				} else {
-					descriptionHTML.WriteString("<br><b>No Work Items associated to this deploy</b><br>")
+				desc, err := composeDescription(event, v)
+				if err != nil {
+					fmt.Println(err)
 				}
 
-				id, err := c.Create(event.ReleaseName, event.EnvironmentName, descriptionHTML.String(), event.Timestamp)
+				err = createChange(event.ReleaseName, event.EnvironmentName, desc.String(), event.Timestamp, &s, fs)
 				if err != nil {
 					fmt.Println(err)
 				} else {
-					s.ChangeID = id
-
-					err := c.Update(event.DetailedMessageHTML, freshservice.StatusOpen)
+					err := updateChange(event.DetailedMessageHTML, freshservice.StatusOpen, &s, fs)
 					if err != nil {
 						fmt.Println(err)
 					} else {
@@ -75,7 +52,7 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer, v *vss.VSTS) {
 								status = freshservice.StatusPendingReview
 							}
 
-							err := c.Update(s.LastEvent.DetailedMessageHTML, status)
+							err := updateChange(s.LastEvent.DetailedMessageHTML, status, &s, fs)
 							if err != nil {
 								fmt.Println(err)
 							}
@@ -96,7 +73,7 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer, v *vss.VSTS) {
 						status = freshservice.StatusPendingReview
 					}
 
-					err := c.Update(event.DetailedMessageHTML, status)
+					err := updateChange(event.DetailedMessageHTML, status, &s, fs)
 					if err != nil {
 						fmt.Println(err)
 					}
@@ -115,7 +92,7 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer, v *vss.VSTS) {
 						status = freshservice.StatusOpen
 					}
 
-					err := c.Update(event.DetailedMessageHTML, status)
+					err := updateChange(event.DetailedMessageHTML, status, &s, fs)
 					if err != nil {
 						fmt.Println(err)
 					}
@@ -126,7 +103,7 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer, v *vss.VSTS) {
 				fmt.Printf("[Release: %v] Event: %v\n", tc, vss.DeploymentCompletedEvent)
 
 				if 0 != s.ChangeID {
-					err := c.Update(event.DetailedMessageHTML, freshservice.StatusClosed)
+					err := updateChange(event.DetailedMessageHTML, freshservice.StatusClosed, &s, fs)
 					if err != nil {
 						fmt.Println(err)
 					}
@@ -141,7 +118,7 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer, v *vss.VSTS) {
 
 				fmt.Printf("[Release: %v] Event: %v\n", tc, "Deployment timeout")
 
-				err := c.Update("Deployment timeout<br>Status: Failed", freshservice.StatusClosed)
+				err := updateChange("Deployment timeout<br>Status: Failed", freshservice.StatusClosed, &s, fs)
 				if err != nil {
 					fmt.Println(err)
 				}
@@ -150,4 +127,83 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer, v *vss.VSTS) {
 			return
 		}
 	}
+}
+
+func composeDescription(event *vss.Event, v *vss.TFS) (*strings.Builder, error) {
+	var s strings.Builder
+
+	if v != nil {
+		s.WriteString("<br><b>Work Items to deploy</b><br>")
+
+		r, err := v.GetRelease(event.ProjectID, event.ReleaseID)
+		if err != nil {
+			return &s, err
+		}
+
+		ws, err := v.GetWorkItems(event.ProjectID, r.Artifacts[0].DefinitionReference.Version.ID)
+		if err != nil {
+			return &s, err
+		}
+
+		for _, item := range ws.Value {
+			w, err := v.GetWorkItem(item.ID)
+			if err != nil {
+				return &s, err
+			}
+
+			s.WriteString("<br>[" + w.Fields.SystemWorkItemType + "] <a href='" + w.Links.HTML.Href + "'>" + w.Fields.SystemTitle + "</a>")
+		}
+	} else {
+		s.WriteString("<br><b>No Work Items associated to this deploy</b><br>")
+	}
+
+	return &s, nil
+}
+
+func createChange(name string, environment string, msg string, date string, s *state, fs *freshservice.Freshservice) error {
+
+	c := &freshservice.RequestItilChange{}
+
+	c.ItilChange.Subject = "[Release Management] Deployment of release " + name + " to environment " + environment
+	c.ItilChange.DescriptionHTML = msg
+	c.ItilChange.Status = freshservice.StatusPendingRelease
+	c.ItilChange.Priority = freshservice.PriorityMedium
+	c.ItilChange.ChangeType = freshservice.TypeStandard
+	c.ItilChange.Risk = freshservice.RiskMedium
+	c.ItilChange.Impact = freshservice.ImpactMedium
+	c.ItilChange.PlannedStartDate = date
+	c.ItilChange.PlannedEndDate = date
+
+	s.RequestItilChange = c
+
+	resItilChange, err := fs.CreateChange(c)
+	if err != nil {
+		return err
+	}
+
+	s.ResponseItilChange = resItilChange
+
+	return nil
+}
+
+func updateChange(msg string, status int, s *state, fs *freshservice.Freshservice) error {
+
+	n := &freshservice.RequestNote{}
+	n.Note.BodyHTML = msg
+
+	_, err := fs.AddChangeNote(s.ResponseItilChange.Item.ItilChange.DisplayID, n)
+	if err != nil {
+		return err
+	}
+
+	s.RequestItilChange.ItilChange.Status = status
+	s.RequestItilChange.ItilChange.PlannedStartDate = ""
+	s.RequestItilChange.ItilChange.PlannedEndDate = ""
+
+	_, err = fs.UpdateChange(s.ResponseItilChange.Item.ItilChange.DisplayID, s.RequestItilChange)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

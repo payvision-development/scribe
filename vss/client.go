@@ -8,94 +8,99 @@ import (
 	"github.com/payvision-development/scribe/httpclient"
 )
 
-// VSTS struct
-type VSTS struct {
-	URL    string
-	APIKey string
+// TFS struct
+type TFS struct {
+	ServerURL     string
+	CollectionURL string
+	APIKey        string
 }
 
 // NewClient func
-func NewClient(url string, apikey string) *VSTS {
-	fs := new(VSTS)
-	fs.URL = url
-	fs.APIKey = apikey
-	return fs
+func NewClient(serverURL string, collectionURL string, apikey string) *TFS {
+	tfs := new(TFS)
+	tfs.ServerURL = serverURL
+	tfs.CollectionURL = collectionURL
+	tfs.APIKey = apikey
+	return tfs
 }
 
-// Release func
-func (fs *VSTS) Release(ReleaseURL string) (*Release, error) {
+// GetRelease func
+func (tfs *TFS) GetRelease(projectID string, releaseID int) (*Release, error) {
 
-	req, err := http.NewRequest("GET", ReleaseURL, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.SetBasicAuth("", fs.APIKey)
-	req.Header.Set("Content-Type", "application/json")
-	res, err := httpclient.DoRequest(req)
-	if err != nil {
-		return nil, err
-	}
-
-	var resRelease Release
-
-	err = json.Unmarshal(res, &resRelease)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resRelease, nil
-}
-
-// WorkItems func
-func (fs *VSTS) WorkItems(r *Release) (*WorkItems, error) {
-
-	// TODO: Check in case several artifacts were associated to the build
-	url := fmt.Sprintf(fs.URL + r.Artifacts[0].DefinitionReference.Project.Name + "/_apis/build/builds/" + r.Artifacts[0].DefinitionReference.Version.ID + "/workitems?api-version=2.0")
+	url := fmt.Sprintf("%v/%v/_apis/release/releases/%v/?api-version=4.1-preview.6", tfs.CollectionURL, projectID, releaseID)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req.SetBasicAuth("", fs.APIKey)
+	req.SetBasicAuth("", tfs.APIKey)
 	req.Header.Set("Content-Type", "application/json")
 	res, err := httpclient.DoRequest(req)
 	if err != nil {
 		return nil, err
 	}
 
-	var resWorkItems WorkItems
+	var r Release
 
-	err = json.Unmarshal(res, &resWorkItems)
+	err = json.Unmarshal(res, &r)
 	if err != nil {
 		return nil, err
 	}
 
-	return &resWorkItems, nil
+	return &r, nil
 }
 
-// WorkItem func
-func (fs *VSTS) WorkItem(URL string) (*WorkItem, error) {
+// GetWorkItems func
+func (tfs *TFS) GetWorkItems(projectID string, buildID string) (*WorkItems, error) {
 
-	req, err := http.NewRequest("GET", URL, nil)
+	url := fmt.Sprintf("%v/%v/_apis/build/builds/%v/workitems?api-version=4.1", tfs.CollectionURL, projectID, buildID)
+
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req.SetBasicAuth("", fs.APIKey)
+	req.SetBasicAuth("", tfs.APIKey)
 	req.Header.Set("Content-Type", "application/json")
 	res, err := httpclient.DoRequest(req)
 	if err != nil {
 		return nil, err
 	}
 
-	var resWorkItem WorkItem
+	var r WorkItems
 
-	err = json.Unmarshal(res, &resWorkItem)
+	err = json.Unmarshal(res, &r)
 	if err != nil {
 		return nil, err
 	}
 
-	return &resWorkItem, nil
+	return &r, nil
+}
+
+// GetWorkItem func
+func (tfs *TFS) GetWorkItem(workItemID string) (*WorkItem, error) {
+
+	url := fmt.Sprintf("%v/_apis/wit/workitems/%v?api-version=4.1", tfs.CollectionURL, workItemID)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.SetBasicAuth("", tfs.APIKey)
+	req.Header.Set("Content-Type", "application/json")
+	res, err := httpclient.DoRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var r WorkItem
+
+	err = json.Unmarshal(res, &r)
+	if err != nil {
+		return nil, err
+	}
+
+	return &r, nil
 }

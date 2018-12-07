@@ -12,7 +12,6 @@ import (
 	"github.com/payvision-development/scribe"
 	"github.com/payvision-development/scribe/freshservice"
 	"github.com/payvision-development/scribe/health"
-	"github.com/payvision-development/scribe/release"
 	"github.com/payvision-development/scribe/vss"
 	"github.com/urfave/negroni"
 )
@@ -117,15 +116,15 @@ func eventRouter() {
 			d = make(chan *vss.Event)
 			m[event.ReleaseTrackingCode] = d
 
-			var v *vss.VSTS
+			var v *vss.TFS
 
-			if event.ProjectBaseURL != "" {
-				v = vss.NewClient(event.ProjectBaseURL, env.VstsApikey)
-			} 
-			
-			c := release.FreshserviceChanger{Client: freshservice.NewClient(env.FreshserviceURL, env.FreshserviceEmail, env.FreshserviceApikey)}
+			if event.ServerURL != "" || event.CollectionURL != "" {
+				v = vss.NewClient(event.ServerURL, event.CollectionURL, env.VstsApikey)
+			}
 
-			go scribe.Session(event.ReleaseTrackingCode, d, &c, v)
+			fs := freshservice.NewClient(env.FreshserviceURL, env.FreshserviceEmail, env.FreshserviceApikey)
+
+			go scribe.Session(event.ReleaseTrackingCode, d, fs, v)
 		}
 
 		d <- event
