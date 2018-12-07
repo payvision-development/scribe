@@ -2,6 +2,7 @@ package scribe
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/payvision-development/scribe/freshservice"
@@ -15,7 +16,7 @@ type state struct {
 }
 
 // Session func
-func Session(tc uint32, ch chan *vss.Event, c release.Changer) {
+func Session(tc uint32, ch chan *vss.Event, c release.Changer, v *vss.VSTS) {
 
 	s := state{}
 
@@ -28,7 +29,34 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer) {
 
 				fmt.Printf("[Release: %v] Event: %v\n", tc, vss.DeploymentStartedEvent)
 
-				id, err := c.Create(event.ReleaseName, event.EnvironmentName, event.DetailedMessageHTML, event.Timestamp)
+				var descriptionHTML strings.Builder
+
+				if v != nil {
+					descriptionHTML.WriteString("<br><b>Work Items to deploy</b><br>")
+
+					release, err := v.Release(event.ReleaseURL)
+					if err != nil {
+						fmt.Println(err)
+					} else {
+						workItems, err := v.WorkItems(release)
+						if err != nil {
+							fmt.Println(err)
+						} else {
+							for _, workItem := range workItems.Value {
+								w, err := v.WorkItem(workItem.URL)
+								if err != nil {
+									fmt.Println(err)
+								} else {
+									descriptionHTML.WriteString("<br>[" + w.Fields.SystemWorkItemType + "] <a href='" + w.Links.HTML.Href + "'>" + w.Fields.SystemTitle + "</a>")
+								}
+							}
+						}
+					}
+				} else {
+					descriptionHTML.WriteString("<br><b>No Work Items associated to this deploy</b><br>")
+				}
+
+				id, err := c.Create(event.ReleaseName, event.EnvironmentName, descriptionHTML.String(), event.Timestamp)
 				if err != nil {
 					fmt.Println(err)
 				} else {
@@ -37,20 +65,20 @@ func Session(tc uint32, ch chan *vss.Event, c release.Changer) {
 					err := c.Update(event.DetailedMessageHTML, freshservice.StatusOpen)
 					if err != nil {
 						fmt.Println(err)
-					}
+					} else {
+						if nil != s.LastEvent && vss.DeploymentApprovalPendingEvent == s.LastEvent.EventType {
+							var status int
 
-					if nil != s.LastEvent && vss.DeploymentApprovalPendingEvent == s.LastEvent.EventType {
-						var status int
+							if "preDeploy" == s.LastEvent.ApprovalType {
+								status = freshservice.StatusAwaitingApproval
+							} else {
+								status = freshservice.StatusPendingReview
+							}
 
-						if "preDeploy" == s.LastEvent.ApprovalType {
-							status = freshservice.StatusAwaitingApproval
-						} else {
-							status = freshservice.StatusPendingReview
-						}
-
-						err := c.Update(s.LastEvent.DetailedMessageHTML, status)
-						if err != nil {
-							fmt.Println(err)
+							err := c.Update(s.LastEvent.DetailedMessageHTML, status)
+							if err != nil {
+								fmt.Println(err)
+							}
 						}
 					}
 				}

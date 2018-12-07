@@ -13,13 +13,15 @@ import (
 // Freshservice struct
 type Freshservice struct {
 	URL    string
+	Email  string
 	APIKey string
 }
 
 // NewClient func
-func NewClient(url string, apikey string) *Freshservice {
+func NewClient(url string, email string, apikey string) *Freshservice {
 	fs := new(Freshservice)
 	fs.URL = url
+	fs.Email = email
 	fs.APIKey = apikey
 	return fs
 }
@@ -27,6 +29,8 @@ func NewClient(url string, apikey string) *Freshservice {
 // CreateChange func
 func (fs *Freshservice) CreateChange(c *RequestItilChange) (*ResponseItilChange, error) {
 	url := fmt.Sprintf(fs.URL + "/itil/changes.json")
+
+	c.ItilChange.Email = fs.Email
 
 	reqItilChange, err := json.Marshal(c)
 	if err != nil {

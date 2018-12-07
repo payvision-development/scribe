@@ -43,7 +43,9 @@ docker run --rm -it
     -e SCRIBE_USER="user"
     -e SCRIBE_PASS="pass"
     -e SCRIBE_FRESHSERVICE_URL="https://foo.freshservice.com"
+    -e SCRIBE_FRESHSERVICE_EMAIL="hulk@outerspace.com"
     -e SCRIBE_FRESHSERVICE_APIKEY="key"
+    -e SCRIBE_VSTS_APIKEY="key"
     -p 8080:8080 scribe
 ```
 

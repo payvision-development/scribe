@@ -12,9 +12,7 @@ import (
 
 func TestCreateChange(t *testing.T) {
 	fsURL := "https://foo.freshservice.com"
-	fsKey := "key"
-
-	fs := NewClient(fsURL, fsKey)
+	fs := NewClient(fsURL, "hulk@outerspace.com", "key")
 
 	resJSON := `{
 		"status": true,
@@ -76,7 +74,6 @@ func TestCreateChange(t *testing.T) {
 
 	c := &RequestItilChange{}
 
-	c.ItilChange.Email = "hulk@outerspace.com"
 	c.ItilChange.Subject = "change for support"
 	c.ItilChange.DescriptionHTML = "change description"
 	c.ItilChange.Status = StatusOpen
@@ -106,9 +103,7 @@ func TestCreateChange(t *testing.T) {
 
 func TestUpdateChangeStatus(t *testing.T) {
 	fsURL := "https://foo.freshservice.com"
-	fsKey := "key"
-
-	fs := NewClient(fsURL, fsKey)
+	fs := NewClient(fsURL, "hulk@outerspace.com", "key")
 
 	changeID := 1
 	changeStatus := StatusOpen
@@ -172,7 +167,6 @@ func TestUpdateChangeStatus(t *testing.T) {
 
 	c := &RequestItilChange{}
 
-	c.ItilChange.Email = "hulk@outerspace.com"
 	c.ItilChange.Subject = "change for support"
 	c.ItilChange.DescriptionHTML = "change description"
 	c.ItilChange.Status = changeStatus
@@ -195,9 +189,7 @@ func TestUpdateChangeStatus(t *testing.T) {
 
 func TestAddChangeNote(t *testing.T) {
 	fsURL := "https://foo.freshservice.com"
-	fsKey := "key"
-
-	fs := NewClient(fsURL, fsKey)
+	fs := NewClient(fsURL, "hulk@outerspace.com", "key")
 
 	changeID := 1
 	changeNote := "Hi Hulk, Still Angry"

@@ -22,7 +22,6 @@ func (f *FreshserviceChanger) Create(name string, environment string, msg string
 
 	c := &freshservice.RequestItilChange{}
 
-	c.ItilChange.Email = "hulk@outerspace.com"
 	c.ItilChange.Subject = "[Release Management] Deployment of release " + name + " to environment " + environment
 	c.ItilChange.DescriptionHTML = msg
 	c.ItilChange.Status = freshservice.StatusPendingRelease

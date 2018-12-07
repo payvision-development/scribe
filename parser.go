@@ -30,6 +30,8 @@ func Parser(b []byte) (*vss.Event, error) {
 	re.ResourceVersion = string(v.GetStringBytes("resourceVersion"))
 	re.Timestamp = string(v.GetStringBytes("createdDate"))
 	re.ProjectID = string(v.Get("resource").Get("project").GetStringBytes("id"))
+	re.ProjectName = string(v.Get("resource").Get("project").GetStringBytes("name"))
+	re.ProjectBaseURL = string(v.Get("resourceContainers").Get("project").GetStringBytes("baseUrl"))
 
 	if strings.Compare(re.ProjectID, "00000000-0000-0000-0000-000000000000") == 0 {
 

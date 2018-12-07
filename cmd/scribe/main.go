@@ -22,7 +22,9 @@ type Specification struct {
 	User               string `required:"true"`
 	Pass               string `required:"true"`
 	FreshserviceURL    string `required:"true" split_words:"true"`
+	FreshserviceEmail  string `required:"true" split_words:"true"`
 	FreshserviceApikey string `required:"true" split_words:"true"`
+	VstsApikey         string `required:"true" split_words:"true"`
 }
 
 var env Specification
@@ -75,7 +77,7 @@ func status(rw http.ResponseWriter, req *http.Request) {
 		Version:     "1.0.0",
 	}
 
-	client := freshservice.NewClient(env.FreshserviceURL, env.FreshserviceApikey)
+	client := freshservice.NewClient(env.FreshserviceURL, env.FreshserviceEmail, env.FreshserviceApikey)
 
 	err := client.CheckEndpoint()
 	if err != nil {
@@ -107,20 +109,25 @@ func eventRouter() {
 	m := make(map[uint32]chan *vss.Event)
 
 	for event := range events {
-		deploy, ok := m[event.ReleaseTrackingCode]
+		d, ok := m[event.ReleaseTrackingCode]
 
 		if !ok {
 			fmt.Printf("[Release: %v] Creating new session...\n", event.ReleaseTrackingCode)
 
-			deploy = make(chan *vss.Event)
-			m[event.ReleaseTrackingCode] = deploy
+			d = make(chan *vss.Event)
+			m[event.ReleaseTrackingCode] = d
 
-			client := freshservice.NewClient(env.FreshserviceURL, env.FreshserviceApikey)
-			changer := release.FreshserviceChanger{Client: client}
+			var v *vss.VSTS
 
-			go scribe.Session(event.ReleaseTrackingCode, deploy, &changer)
+			if event.ProjectBaseURL != "" {
+				v = vss.NewClient(event.ProjectBaseURL, env.VstsApikey)
+			} 
+			
+			c := release.FreshserviceChanger{Client: freshservice.NewClient(env.FreshserviceURL, env.FreshserviceEmail, env.FreshserviceApikey)}
+
+			go scribe.Session(event.ReleaseTrackingCode, d, &c, v)
 		}
 
-		deploy <- event
+		d <- event
 	}
 }
