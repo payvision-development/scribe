@@ -72,7 +72,7 @@ func status(rw http.ResponseWriter, req *http.Request) {
 		Service:     "Scribe",
 		Description: "VSTS Release event integration with Freshservice",
 		Status:      "OK",
-		Version:     "0.0.0",
+		Version:     "1.0.0",
 	}
 
 	client := freshservice.NewClient(env.FreshserviceURL, env.FreshserviceApikey)
