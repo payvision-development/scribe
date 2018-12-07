@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Add Work Items to Freshservice change when available
 - Refactor TFS API client 
+- Add more service info to health endpoint
 
 ## 1.0.0 - 2018-12-07
 ### Added

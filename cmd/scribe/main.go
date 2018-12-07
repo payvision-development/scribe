@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/kelseyhightower/envconfig"
@@ -28,6 +29,9 @@ type Specification struct {
 
 var env Specification
 var events = make(chan *vss.Event, 10)
+
+var date = time.Now()
+var count uint32
 
 func main() {
 	fmt.Println("Scribe is alive")
@@ -74,6 +78,10 @@ func status(rw http.ResponseWriter, req *http.Request) {
 		Description: "VSTS Release event integration with Freshservice",
 		Status:      "OK",
 		Version:     "1.0.0",
+		Info: health.Info{
+			Started: date,
+			Events:  count,
+		},
 	}
 
 	client := freshservice.NewClient(env.FreshserviceURL, env.FreshserviceEmail, env.FreshserviceApikey)
@@ -87,6 +95,8 @@ func status(rw http.ResponseWriter, req *http.Request) {
 }
 
 func vssRelease(rw http.ResponseWriter, req *http.Request) {
+	count++
+
 	b, err := ioutil.ReadAll(req.Body)
 	defer req.Body.Close()
 
