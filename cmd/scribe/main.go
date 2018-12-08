@@ -121,7 +121,7 @@ func eventRouter() {
 		d, ok := m[event.ReleaseTrackingCode]
 
 		if !ok {
-			fmt.Printf("[Release: %v] Creating new session...\n", event.ReleaseTrackingCode)
+			fmt.Printf("[Release: %v] Creating new session for release %v (%v)\n", event.ReleaseTrackingCode, event.ReleaseName, event.ReleaseID)
 
 			d = make(chan *vss.Event)
 			m[event.ReleaseTrackingCode] = d
