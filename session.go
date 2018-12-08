@@ -28,20 +28,20 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 
 			case vss.DeploymentStartedEvent:
 
-				fmt.Printf("[Release: %v] Event: %v\n", tc, vss.DeploymentStartedEvent)
+				fmt.Printf("[Release: %v] Event received: %v\n", tc, vss.DeploymentStartedEvent)
 
 				desc, err := composeDescription(event, v)
 				if err != nil {
-					fmt.Println(err)
+					fmt.Printf("[Release: %v] [ERR] Work Items not found: %v\n", tc, err)
 				}
 
 				err = createChange(event.ReleaseName, event.EnvironmentName, desc, event.Timestamp, &s, fs)
 				if err != nil {
-					fmt.Println(err)
+					fmt.Printf("[Release: %v] [ERR] There was an error during the creation of the change: %v\n", tc, err)
 				} else {
 					err := updateChange(event.DetailedMessageHTML, freshservice.StatusOpen, &s, fs)
 					if err != nil {
-						fmt.Println(err)
+						fmt.Printf("[Release: %v] [ERR] There was an error updating the change: %v\n", tc, err)
 					} else {
 						if nil != s.LastEvent && vss.DeploymentApprovalPendingEvent == s.LastEvent.EventType {
 							var status int
@@ -54,7 +54,7 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 
 							err := updateChange(s.LastEvent.DetailedMessageHTML, status, &s, fs)
 							if err != nil {
-								fmt.Println(err)
+								fmt.Printf("[Release: %v] [ERR] There was an error updating the change: %v\n", tc, err)
 							}
 						}
 					}
@@ -62,7 +62,7 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 
 			case vss.DeploymentApprovalPendingEvent:
 
-				fmt.Printf("[Release: %v] Event: %v\n", tc, vss.DeploymentApprovalPendingEvent)
+				fmt.Printf("[Release: %v] Event received: %v\n", tc, vss.DeploymentApprovalPendingEvent)
 
 				if 0 != s.ChangeID {
 					var status int
@@ -75,13 +75,13 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 
 					err := updateChange(event.DetailedMessageHTML, status, &s, fs)
 					if err != nil {
-						fmt.Println(err)
+						fmt.Printf("[Release: %v] [ERR] There was an error updating the change: %v\n", tc, err)
 					}
 				}
 
 			case vss.DeploymentApprovalCompletedEvent:
 
-				fmt.Printf("[Release: %v] Event: %v\n", tc, vss.DeploymentApprovalCompletedEvent)
+				fmt.Printf("[Release: %v] Event received: %v\n", tc, vss.DeploymentApprovalCompletedEvent)
 
 				if 0 != s.ChangeID {
 					var status int
@@ -94,18 +94,18 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 
 					err := updateChange(event.DetailedMessageHTML, status, &s, fs)
 					if err != nil {
-						fmt.Println(err)
+						fmt.Printf("[Release: %v] [ERR] There was an error updating the change: %v\n", tc, err)
 					}
 				}
 
 			case vss.DeploymentCompletedEvent:
 
-				fmt.Printf("[Release: %v] Event: %v\n", tc, vss.DeploymentCompletedEvent)
+				fmt.Printf("[Release: %v] Event received: %v\n", tc, vss.DeploymentCompletedEvent)
 
 				if 0 != s.ChangeID {
 					err := updateChange(event.DetailedMessageHTML, freshservice.StatusClosed, &s, fs)
 					if err != nil {
-						fmt.Println(err)
+						fmt.Printf("[Release: %v] [ERR] There was an error updating the change: %v\n", tc, err)
 					}
 				}
 			}
@@ -120,7 +120,7 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 
 				err := updateChange("Deployment timeout<br>Status: Failed", freshservice.StatusClosed, &s, fs)
 				if err != nil {
-					fmt.Println(err)
+					fmt.Printf("[Release: %v] [ERR] There was an error updating the change: %v\n", tc, err)
 				}
 			}
 
@@ -138,21 +138,26 @@ func composeDescription(event *vss.Event, v *vss.TFS) (string, error) {
 			return "", err
 		}
 
-		ws, err := v.GetWorkItems(event.ProjectID, r.Artifacts[0].DefinitionReference.Version.ID)
-		if err != nil {
-			return "", err
-		}
+		if r.Artifacts != nil && len(r.Artifacts) != 0 {
+			for _, a := range r.Artifacts {
 
-		if ws.Count != 0 {
-			s.WriteString("<br><b>Work Items to deploy</b><br>")
-
-			for _, item := range ws.Value {
-				w, err := v.GetWorkItem(item.ID)
+				ws, err := v.GetWorkItems(event.ProjectID, a.DefinitionReference.Version.ID)
 				if err != nil {
 					return "", err
 				}
 
-				s.WriteString("<br>[" + w.Fields.SystemWorkItemType + "] <a href='" + w.Links.HTML.Href + "'>" + w.Fields.SystemTitle + "</a>")
+				if ws.Count != 0 {
+					s.WriteString("<br><b>Work Items to deploy from " + a.Alias + " (" + a.Type + ")</b><br>")
+
+					for _, item := range ws.Value {
+						w, err := v.GetWorkItem(item.ID)
+						if err != nil {
+							return "", err
+						}
+
+						s.WriteString("<br>[" + w.Fields.SystemWorkItemType + "] <a href='" + w.Links.HTML.Href + "'>" + w.Fields.SystemTitle + "</a>")
+					}
+				}
 			}
 
 			return s.String(), nil

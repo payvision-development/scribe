@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 - Add Work Items to Freshservice change when available
 - Refactor TFS API client 
 - Add more service info to health endpoint
+- Improve log messages
+- Add Work Items from all release artifacts and improve deploy items message  
 
 ## 1.0.0 - 2018-12-07
 ### Added

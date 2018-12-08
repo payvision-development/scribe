@@ -61,7 +61,7 @@ GET /status HTTP/1.1
     "Version": "1.0.0",
     "Info": {
         "Started": "2018-01-01T00:00:00.000000000+01:00",
-        "Events": 1000
+        "Events": 0
     }
 }
 ```
