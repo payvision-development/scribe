@@ -23,10 +23,19 @@ Web Hooks provides a way to send a JSON representation of an event to any servic
 
 Service Hook configuration:
 
-- Service Hook URL: https://scribe.app/vss/release  
+- Service Hook URL: https://myhost/vss/release  
 - Resource details to send: All 
 - Messages to send: All 
 - Detailed messages to send: All 
+
+![VSTS Service Hook creation](https://raw.githubusercontent.com/payvision-development/scribe/master/img/service-hook-configuration.gif)
+
+Create one service hook for each release deployment event:
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/service-hooks.png" alt="Service Hooks" width="800">
+  <br><br>
+</p>
 
 For more information about how to configure VSTS service hooks events go to: https://docs.microsoft.com/en-us/vsts/service-hooks/services/webhooks?view=vsts
 
