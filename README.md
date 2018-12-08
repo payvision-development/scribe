@@ -33,11 +33,20 @@ Service Hook configuration:
 Create one service hook for each release deployment event:
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/service-hooks.png" alt="Service Hooks" width="800">
-  <br><br>
+  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/service-hooks.png" alt="Service Hooks">
+  <br>
 </p>
 
 For more information about how to configure VSTS service hooks events go to: https://docs.microsoft.com/en-us/vsts/service-hooks/services/webhooks?view=vsts
+
+## Freshservice
+
+This configuration will result in a detailed and realtime updated Freshservice Change, most of the descriptions constains links to each item in Azure DevOps / TFS portal.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/freshservice-change.png" alt="Freshservice Change">
+  <br>
+</p>
 
 ## Build and execution
 
