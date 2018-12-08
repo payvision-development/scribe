@@ -21,4 +21,4 @@ All notable changes to this project will be documented in this file.
 - Multi-stage Dockerfile
 
 [Unreleased]: https://github.com/payvision-development/scribe/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/payvision-development/scribe/compare/v1.0.0...1.1.0
+[1.1.0]: https://github.com/payvision-development/scribe/compare/v1.0.0...v1.1.0
