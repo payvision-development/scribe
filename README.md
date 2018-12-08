@@ -8,7 +8,7 @@
   <br><br>
 </p>
 
-The goal of this project is to capture VSTS service hooks events, specifically those related with the release process and register the progress in the Freshservice platform.
+The goal of this project is to capture VSTS service hooks events, specifically those related with the release process from [Release Management](https://docs.microsoft.com/en-us/azure/devops/pipelines/release/what-is-release-management?view=vsts) and register the progress in the [Freshservice](https://freshservice.com) platform.
 
 Documentation: [Execution Flow](https://github.com/payvision-development/scribe/wiki/Execution-Flow)
 
@@ -41,7 +41,7 @@ For more information about how to configure VSTS service hooks events go to: htt
 
 ## Freshservice
 
-This configuration will result in a detailed and realtime updated Freshservice Change, most of the descriptions constains links to each item in Azure DevOps / TFS portal.
+Freshservice is a cloud-based service desk and IT service management (ITSM) solution. The above service hook configuration will result in a detailed and always updated Freshservice Change for each deployment, most of the descriptions constains links to each item in Azure DevOps / TFS portal.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/freshservice-change.png" alt="Freshservice Change">
