@@ -67,7 +67,7 @@ GET /status HTTP/1.1
     "Service": "Scribe",
     "Description": "VSTS Release event integration with Freshservice",
     "Status": "OK",
-    "Version": "1.0.0",
+    "Version": "1.1.0",
     "Info": {
         "Started": "2018-01-01T00:00:00.000000000+01:00",
         "Events": 0
