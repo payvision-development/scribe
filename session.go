@@ -10,7 +10,6 @@ import (
 )
 
 type state struct {
-	ChangeID           int64
 	LastEvent          *vss.Event
 	RequestItilChange  *freshservice.RequestItilChange
 	ResponseItilChange *freshservice.ResponseItilChange
@@ -64,7 +63,7 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 
 				fmt.Printf("[Release: %v] Event received: %v\n", tc, vss.DeploymentApprovalPendingEvent)
 
-				if 0 != s.ChangeID {
+				if s.ResponseItilChange != nil && 0 != s.ResponseItilChange.Item.ItilChange.DisplayID {
 					var status int
 
 					if "preDeploy" == event.ApprovalType {
@@ -83,7 +82,7 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 
 				fmt.Printf("[Release: %v] Event received: %v\n", tc, vss.DeploymentApprovalCompletedEvent)
 
-				if 0 != s.ChangeID {
+				if s.ResponseItilChange != nil && 0 != s.ResponseItilChange.Item.ItilChange.DisplayID {
 					var status int
 
 					if "preDeploy" == event.ApprovalType {
@@ -102,7 +101,7 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 
 				fmt.Printf("[Release: %v] Event received: %v\n", tc, vss.DeploymentCompletedEvent)
 
-				if 0 != s.ChangeID {
+				if s.ResponseItilChange != nil && 0 != s.ResponseItilChange.Item.ItilChange.DisplayID {
 					err := updateChange(event.DetailedMessageHTML, freshservice.StatusClosed, &s, fs)
 					if err != nil {
 						fmt.Printf("[Release: %v] [ERR] There was an error updating the change: %v\n", tc, err)
@@ -114,7 +113,7 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 
 		case <-time.After(30 * time.Minute):
 
-			if 0 != s.ChangeID && s.LastEvent.EventType != vss.DeploymentCompletedEvent {
+			if s.ResponseItilChange != nil && 0 != s.ResponseItilChange.Item.ItilChange.DisplayID && s.LastEvent.EventType != vss.DeploymentCompletedEvent {
 
 				fmt.Printf("[Release: %v] Event: %v\n", tc, "Deployment timeout")
 
