@@ -45,6 +45,8 @@ Build the docker image:
 
     docker build -t scribe .
 
+Or download the image from  `docker pull payvisiondevelopment/scribe:1.1.0`
+
 Run the image with the required environment variables:
 
 ```shell
