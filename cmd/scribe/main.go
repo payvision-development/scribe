@@ -127,7 +127,7 @@ func eventRouter() {
 			m[event.ReleaseTrackingCode] = d
 
 			var v *vss.TFS
-			if event.ServerURL != "" || event.CollectionURL != "" {
+			if event.ServerURL != "" && event.CollectionURL != "" {
 				v = vss.NewClient(event.ServerURL, event.CollectionURL, env.VstsApikey)
 			}
 
