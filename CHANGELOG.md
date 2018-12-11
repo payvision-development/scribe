@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 2018-12-11
+### Changed
+- Add ca-certificates to alpine image in Dockerfile
+
 ## [1.1.0] - 2018-12-08
 ### Added
 - Add Work Items to Freshservice change when available
