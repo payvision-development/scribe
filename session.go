@@ -129,41 +129,45 @@ func Session(tc uint32, ch chan *vss.Event, fs *freshservice.Freshservice, v *vs
 }
 
 func composeDescription(event *vss.Event, v *vss.TFS) (string, error) {
+	nowi := "<br><b>No Work Items associated to this deploy</b><br>"
+
+	if v == nil {
+		return nowi, nil
+	}
+
 	var s strings.Builder
 
-	if v != nil {
-		r, err := v.GetRelease(event.ProjectID, event.ReleaseID)
-		if err != nil {
-			return "", err
-		}
+	r, err := v.GetRelease(event.ProjectID, event.ReleaseID)
+	if err != nil {
+		return "", err
+	}
 
-		if r.Artifacts != nil && len(r.Artifacts) != 0 {
-			for _, a := range r.Artifacts {
+	if r.Artifacts == nil || len(r.Artifacts) == 0 {
+		return nowi, nil
+	}
 
-				ws, err := v.GetWorkItems(event.ProjectID, a.DefinitionReference.Version.ID)
-				if err != nil {
-					return "", err
-				}
-
-				if ws.Count != 0 {
-					s.WriteString("<br><b>Work Items to deploy from " + a.Alias + " (" + a.Type + ")</b><br>")
-
-					for _, item := range ws.Value {
-						w, err := v.GetWorkItem(item.ID)
-						if err != nil {
-							return "", err
-						}
-
-						s.WriteString("<br>[" + w.Fields.SystemWorkItemType + "] <a href='" + w.Links.HTML.Href + "'>" + w.Fields.SystemTitle + "</a>")
-					}
-				}
+	for _, a := range r.Artifacts {
+		if a.Type == vss.ArtifactBuildType {
+			ws, err := v.GetWorkItems(event.ProjectID, a.DefinitionReference.Version.ID)
+			if err != nil {
+				return "", err
 			}
 
-			return s.String(), nil
+			if ws.Count != 0 {
+				s.WriteString("<br><b>Work Items to deploy from " + a.Alias + " (" + a.Type + ")</b><br>")
+
+				for _, item := range ws.Value {
+					w, err := v.GetWorkItem(item.ID)
+					if err != nil {
+						return "", err
+					}
+
+					s.WriteString("<br>[" + w.Fields.SystemWorkItemType + "] <a href='" + w.Links.HTML.Href + "'>" + w.Fields.SystemTitle + "</a>")
+				}
+			}
 		}
 	}
 
-	s.WriteString("<br><b>No Work Items associated to this deploy</b><br>")
 	return s.String(), nil
 }
 
