@@ -1,87 +1,33 @@
-# VSTS Release Scribe
+# Scribe
 
 [![Build Status](https://travis-ci.org/payvision-development/scribe.svg?branch=master)](https://travis-ci.org/payvision-development/scribe)
 
 <p align="center">
   <br>
-  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/scribe.png" alt="Scribe" width="250">
+  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/scribe.png" alt="Scribe" width="200">
   <br><br>
 </p>
 
-The goal of this project is to capture VSTS service hooks events, specifically those related with the release process from [Release Management](https://docs.microsoft.com/en-us/azure/devops/pipelines/release/what-is-release-management?view=vsts) and register the progress in the [Freshservice](https://freshservice.com) platform.
+The goal of this project is to capture Azure Devops service hooks events, specifically those related with the release pipeline from [Azure Devops release pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/release/?view=azure-devops) keeping track of the progress and recording changes in real time in [Freshservice](https://freshservice.com) platform auditing all the continuously delivery process.
 
-Documentation: [Execution Flow](https://github.com/payvision-development/scribe/wiki/Execution-Flow)
+### Documentation
 
-## Configuration
+* [Build and execution](https://github.com/payvision-development/scribe/wiki/Build-and-execution)
+  * [Debugging in Visual Studio Code](https://github.com/payvision-development/scribe/wiki/Debugging-in-Visual-Studio-Code)
+* [Execution flow](https://github.com/payvision-development/scribe/wiki/Execution-Flow)
+* [Configuration](https://github.com/payvision-development/scribe/wiki/Configuration)
+* [Freshservice](https://github.com/payvision-development/scribe/wiki/Freshservice)
 
-Web Hooks provides a way to send a JSON representation of an event to any service, to start sending this events go to your VSTS project service hooks page and configure the VSTS event to fire it when any of this event types occurs:
+### Example
 
-- Release deployment started: `ms.vss-release.deployment-started-event`
-- Release deployment approval pending: `ms.vss-release.deployment-approval-pending-event`
-- Release deployment approval completed: `ms.vss-release.deployment-approval-completed-event`
-- Release deployment completed: `ms.vss-release.deployment-completed-event`
-
-Service Hook configuration:
-
-- Service Hook URL: https://myhost/vss/release  
-- Resource details to send: All 
-- Messages to send: All 
-- Detailed messages to send: All 
-
-![VSTS Service Hook creation](https://raw.githubusercontent.com/payvision-development/scribe/master/img/service-hook-configuration.gif)
-
-Create one service hook for each release deployment event:
+A new release is created from Azure Devops release pipelines, usually you define the release pipeline using stages.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/service-hooks.png" alt="Service Hooks">
-  <br>
+  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/azure-devops-release.png" alt="azure-devops-release" width="700">
 </p>
 
-For more information about how to configure VSTS service hooks events go to: https://docs.microsoft.com/en-us/vsts/service-hooks/services/webhooks?view=vsts
-
-## Freshservice
-
-Freshservice is a cloud-based service desk and IT service management (ITSM) solution. The above service hook configuration will result in a detailed and always updated Freshservice Change for each deployment, most of the descriptions constains links to each item in Azure DevOps / TFS portal.
+Each stage is recorded in a Freshservice Change, storing all the updates and progress about your release pipeline in notes attached to the Change.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/freshservice-change.png" alt="Freshservice Change">
-  <br>
+  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/freshservice-change-example.png" alt="freshservice-change" width="700">
 </p>
-
-## Build and execution
-
-Build the docker image:
-
-    docker build -t scribe .
-
-Or download the image from  `docker pull payvisiondevelopment/scribe:1.1.0`
-
-Run the image with the required environment variables:
-
-```shell
-docker run --rm -it 
-    -e SCRIBE_USER="user"
-    -e SCRIBE_PASS="pass"
-    -e SCRIBE_FRESHSERVICE_URL="https://foo.freshservice.com"
-    -e SCRIBE_FRESHSERVICE_EMAIL="hulk@outerspace.com"
-    -e SCRIBE_FRESHSERVICE_APIKEY="key"
-    -e SCRIBE_VSTS_APIKEY="key"
-    -p 8080:8080 scribe
-```
-
-Check the health endpoint:
-
-```json
-GET /status HTTP/1.1
-
-{
-    "Service": "Scribe",
-    "Description": "VSTS Release event integration with Freshservice",
-    "Status": "OK",
-    "Version": "1.1.0",
-    "Info": {
-        "Started": "2018-01-01T00:00:00.000000000+01:00",
-        "Events": 0
-    }
-}
-```
