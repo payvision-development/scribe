@@ -23,11 +23,11 @@ The goal of this project is to capture Azure Devops service hooks events, specif
 A new release is created from Azure Devops release pipelines, usually you define the release pipeline using stages.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/azure-devops-release.png" alt="azure-devops-release" width="700">
+  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/azure-devops-release.png" alt="azure-devops-release">
 </p>
 
-Each stage is recorded in a Freshservice Change, storing all the updates and progress about your release pipeline in notes attached to the Change.
+Each stage is recorded and will result in a detailed and always updated Freshservice Change for each deployment, most of the descriptions constains links to each item in Azure DevOps portal.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/freshservice-change-example.png" alt="freshservice-change" width="700">
+  <img src="https://raw.githubusercontent.com/payvision-development/scribe/master/img/freshservice-change-example.png" alt="freshservice-change">
 </p>
