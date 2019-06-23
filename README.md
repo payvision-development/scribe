@@ -8,7 +8,7 @@
   <br><br>
 </p>
 
-The goal of this project is to capture Azure Devops service hooks events, specifically those related with the release pipeline from [Azure Devops release pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/release/?view=azure-devops) keeping track of the progress and recording changes in real time in [Freshservice](https://freshservice.com) platform auditing all the continuously delivery process.
+The goal of this project is to capture Azure Devops service hooks events, specifically those related with the release pipeline from [Azure Devops release pipelines](https://docs.microsoft.com/en-us/azure/devops/pipelines/release/?view=azure-devops) keeping track of the progress and recording changes in real time in [Freshservice](https://freshservice.com) platform auditing all the continuous delivery process.
 
 ### Documentation
 
