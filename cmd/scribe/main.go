@@ -75,7 +75,7 @@ func basicAuth(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 func status(rw http.ResponseWriter, req *http.Request) {
 	status := health.Status{
 		Service:     "Scribe",
-		Description: "Azure Devops Release event integration with Freshservice",
+		Description: ":rocket: Azure Devops continuously delivery audit in Freshservice",
 		Status:      "OK",
 		Version:     "1.1.0",
 		Info: health.Info{

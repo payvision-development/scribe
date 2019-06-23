@@ -1,7 +1,4 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
@@ -11,12 +8,12 @@
             "mode": "auto",
             "program": "${fileDirname}",
             "env": { 
-                "SCRIBE_USER":"user", 
-                "SCRIBE_PASS":"pass",
-                "SCRIBE_FRESHSERVICE_URL":"https://foo.freshservice.com",
-                "SCRIBE_FRESHSERVICE_EMAIL":"hulk@outerspace.com",
-                "SCRIBE_FRESHSERVICE_APIKEY":"key",
-                "SCRIBE_VSTS_APIKEY":"key"},
+                "SCRIBE_USER": "user", 
+                "SCRIBE_PASS": "pass",
+                "SCRIBE_FRESHSERVICE_URL": "https://foo.freshservice.com",
+                "SCRIBE_FRESHSERVICE_EMAIL": "hulk@outerspace.com",
+                "SCRIBE_FRESHSERVICE_APIKEY": "key",
+                "SCRIBE_VSTS_APIKEY": "key"},
             "args": []
         }
     ]
