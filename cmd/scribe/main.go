@@ -77,7 +77,7 @@ func status(rw http.ResponseWriter, req *http.Request) {
 		Service:     "Scribe",
 		Description: ":rocket: Azure Devops continuous delivery audit in Freshservice",
 		Status:      "OK",
-		Version:     "1.1.0",
+		Version:     "1.1.1",
 		Info: health.Info{
 			Started: date,
 			Events:  count,
