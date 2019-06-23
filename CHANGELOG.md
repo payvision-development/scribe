@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased] - 2019-06-23
 ### Changed
 - Add ca-certificates to alpine image in Dockerfile
+- Fix change creation when there aren't Work Items associated to a deploy
 - Add Azure devops terminology and improve documentation
 
 ## [1.1.0] - 2018-12-08
